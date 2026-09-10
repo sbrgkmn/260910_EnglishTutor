@@ -13,7 +13,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. The development server binds to loopback. No accounts, payments, Supabase, cloud database, or deployment are required.
+Open http://127.0.0.1:3000. The development server binds to loopback. No accounts, payments, Supabase, or cloud database are required for local development.
 
 `OPENAI_API_KEY` is the only required credential for live tutoring. `OPENAI_MODEL` defaults to `gpt-4.1-mini`; choose a Responses API model that supports strict structured outputs. Never use `NEXT_PUBLIC_` for secrets. Restart the dev server after changing environment variables. No credentials are included in this project.
 
@@ -64,7 +64,7 @@ The browser submits a finished text turn to a same-origin server route. The rout
 
 The browser sends recent transcript text to the app server and OpenAI during live tutoring, even though **persistent transcript storage is local**. `store: false` disables Responses application-state storage; it does not itself guarantee zero provider retention. Review the provider’s applicable data and under-18 requirements before a real child-facing release. Browser speech recognition may send audio to the browser vendor, depending on the browser. The app does not use MediaRecorder, save audio, request camera access, or implement voice cloning. Avoid putting private information into practice answers.
 
-This local prototype uses prompt-based teaching/safety boundaries, size limits, timeouts and origin checks. It has no verified consent, durable rate limiting, authentication, or production moderation system. Its acknowledgement flag is not an authorization mechanism. Keep it local for development; a public launch requires a separate security, safeguarding, data-handling and teaching-quality review.
+This local prototype uses prompt-based teaching/safety boundaries, size limits, timeouts and origin checks. It has no verified consent, durable rate limiting, authentication, or production moderation system. Its acknowledgement flag is not an authorization mechanism. The public Sites deployment is a clearly labeled demo with no AI key configured. Enabling live AI for a child-facing release requires a separate security, safeguarding, data-handling and teaching-quality review.
 
 ## Replacing speech services later
 
@@ -82,3 +82,13 @@ Keep the `SavedSession` type as the storage boundary. Replace `getSessions`, `sa
 - [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)
 - [Browser SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition)
 - [Browser SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
+
+## Sites hosting
+
+`npm run build` produces both the normal Next.js production build and a Cloudflare-compatible Sites package in `dist/`. `npm run build:next` builds only Next.js. Local development continues to use `npm run dev`.
+
+The app currently has one prerendered page and no Next server actions, dynamic page routes, or server-rendered per-user content. `scripts/build-sites.mjs` packages that page with its exact Next client chunks and public assets. `hosting/worker.ts` serves static assets through the Sites `ASSETS` binding and routes the two API endpoints to shared handlers in `lib/tutor/handleTutor.ts` and `lib/tutor/handleReport.ts`. Runtime secrets are passed explicitly from Worker bindings; no local environment values are included in the Worker bundle.
+
+The public deployment defaults to demo mode. To enable live tutoring later, configure `OPENAI_API_KEY` as a Sites secret and optionally `OPENAI_MODEL` as a runtime variable, then redeploy. The GitHub repository does not automatically deploy Sites: push the same source revision to the Sites source repository, package the validated `dist/` output with the Sites helper, save a version for that exact commit, and deploy it. The Site identity is recorded in `.openai/hosting.json`.
+
+If you add dynamic Next page routes, server actions, or image optimization later, replace this single-page hosting adapter with a full Next-compatible Worker adapter. Do not expose Next server build intermediates as static assets.

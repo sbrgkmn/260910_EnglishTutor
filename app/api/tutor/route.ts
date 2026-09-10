@@ -1,9 +1,4 @@
-import { buildTutorPrompt } from "@/lib/tutor/buildTutorPrompt";
-import { validateRequest, validateTutorReply } from "@/lib/tutor/validation";
-import { structuredResponse } from "@/lib/tutor/llm";
-import { replySchema } from "@/lib/tutor/schemas";
-import { demoReply } from "@/lib/tutor/demo";
-import { readRequest, errorResponse } from "@/lib/tutor/http";
+import { handleTutor } from "@/lib/tutor/handleTutor";
 export const runtime = "nodejs";
 export async function GET() {
   return Response.json(
@@ -12,27 +7,5 @@ export async function GET() {
   );
 }
 export async function POST(request: Request) {
-  try {
-    const { student, topic, turns, demo } = validateRequest(
-      await readRequest(request),
-    );
-    const prompt = buildTutorPrompt(student, topic, turns);
-    const reply = demo
-      ? demoReply(topic, turns)
-      : validateTutorReply(
-          await structuredResponse(
-            prompt.instructions,
-            prompt.input,
-            replySchema,
-            "tutor_reply",
-            request.signal,
-          ),
-        );
-    return Response.json(
-      { ...reply, mode: demo ? "demo" : "ai" },
-      { headers: { "Cache-Control": "no-store" } },
-    );
-  } catch (error) {
-    return errorResponse(error);
-  }
+  return handleTutor(request);
 }

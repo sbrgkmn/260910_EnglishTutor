@@ -327,8 +327,9 @@ export default function Home() {
                     <details>
                       <summary>Connect live AI</summary>
                       <p>
-                        Add OPENAI_API_KEY to .env.local and restart the app.
-                        Demo replies do not assess your English.
+                        Set OPENAI_API_KEY in server settings and restart or
+                        redeploy the app. Demo replies do not assess your
+                        English.
                       </p>
                     </details>
                   </div>

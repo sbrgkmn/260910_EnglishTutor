@@ -1,4 +1,11 @@
 import "server-only";
+export type TutorConfig = { apiKey?: string; model?: string };
+export function localTutorConfig(): TutorConfig {
+  return {
+    apiKey: process.env.OPENAI_API_KEY,
+    model: process.env.OPENAI_MODEL,
+  };
+}
 export class ProviderError extends Error {
   constructor(
     message: string,
@@ -13,11 +20,12 @@ export async function structuredResponse(
   schema: object,
   name: string,
   signal?: AbortSignal,
+  config: TutorConfig = localTutorConfig(),
 ): Promise<unknown> {
-  const key = process.env.OPENAI_API_KEY;
+  const key = config.apiKey;
   if (!key)
     throw new ProviderError(
-      "AI practice is not configured yet. Add OPENAI_API_KEY to .env.local, or choose demo mode.",
+      "AI practice is not configured yet. Set OPENAI_API_KEY in server settings, or choose demo mode.",
       503,
     );
   const response = await fetch("https://api.openai.com/v1/responses", {
@@ -30,7 +38,7 @@ export async function structuredResponse(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+      model: config.model || "gpt-4.1-mini",
       store: false,
       instructions,
       input,
