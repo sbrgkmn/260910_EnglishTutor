@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 // Reuse Next's prerendered root and its exact client chunks. Do not copy
 // .next/server, source files, local env files, or server build caches to assets.
 const html = await readFile(".next/server/app/index.html", "utf8");
-if (!html.includes("What shall we talk about?"))
+if (!html.includes("Start talking"))
   throw new Error("Expected the built Little Talk root page.");
 await rm("dist", { recursive: true, force: true });
 await mkdir("dist/client/_next", { recursive: true });

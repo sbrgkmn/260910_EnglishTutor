@@ -127,7 +127,10 @@ export class BrowserTextToSpeech implements TextToSpeechService {
   supported() {
     return typeof window !== "undefined" && "speechSynthesis" in window;
   }
-  textToSpeech(text: string, options: { rate?: number } = {}): Promise<void> {
+  textToSpeech(
+    text: string,
+    options: { rate?: number; onStart?: () => void } = {},
+  ): Promise<void> {
     this.cancel();
     if (!this.supported())
       return Promise.reject(
@@ -156,12 +159,14 @@ export class BrowserTextToSpeech implements TextToSpeechService {
         if (done) return;
         done = true;
         clearTimeout(timer);
+        utterance.onstart = null;
         utterance.onend = null;
         utterance.onerror = null;
         this.current = null;
         if (error) reject(error);
         else resolve();
       };
+      utterance.onstart = () => options.onStart?.();
       utterance.onend = () => settle();
       utterance.onerror = (e) =>
         settle(

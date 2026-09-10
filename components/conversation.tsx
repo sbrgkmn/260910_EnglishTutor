@@ -3,14 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowUp,
   BookOpen,
-  Check,
-  ChevronDown,
   Clock3,
   Keyboard,
-  LoaderCircle,
-  MessageCircle,
   Mic,
-  Sparkles,
   Square,
   Volume2,
   VolumeX,
@@ -18,16 +13,21 @@ import {
 import type { Student, Turn, TutorState } from "@/lib/types";
 import type { Topic } from "@/lib/tutor/topics";
 import { validateTutorReply } from "@/lib/tutor/validation";
-import { TopicIcon } from "./icons";
 import { formatTime } from "./report-view";
-import { BrowserTextToSpeech } from "@/lib/speech/browser";
+import type { VoiceProvider } from "@/lib/voice/types";
+import { speechSentences } from "@/lib/voice";
+import { Modal } from "./modal";
 import { handsFreeSupported, listenHandsFree } from "@/lib/speech/hands-free";
 export function Conversation({
+  voice,
+  initialTextMode = false,
   student,
   topic,
   demo,
   onEnd,
 }: {
+  voice: VoiceProvider;
+  initialTextMode?: boolean;
   student: Student;
   topic: Topic;
   demo: boolean;
@@ -55,11 +55,12 @@ export function Conversation({
   const [seconds, setSeconds] = useState(0);
   const [ending, setEnding] = useState(false);
   const [transcript, setTranscript] = useState(false);
-  const [textMode, setTextMode] = useState(false);
+  const [textMode, setTextMode] = useState(initialTextMode);
   const [sound, setSound] = useState(true);
   const [voiceNotice, setVoiceNotice] = useState("");
   const [inputAvailable, setInputAvailable] = useState(true);
-  const speechOutput = useRef(new BrowserTextToSpeech());
+  const speechOutput = useRef(voice);
+  const [currentSentence, setCurrentSentence] = useState("");
   const listening = useRef<AbortController | null>(null);
   const soundEnabled = useRef(true);
   const request = useRef<AbortController | null>(null);
@@ -81,6 +82,12 @@ export function Conversation({
       setSound(false);
       soundEnabled.current = false;
     }
+    const opening = setTimeout(() => {
+      const handsFree = !initialTextMode && handsFreeSupported();
+      autoVoiceRef.current = handsFree;
+      setAutoVoice(handsFree);
+      void send(true);
+    }, 0);
     const timer = setInterval(
       () => setSeconds(Math.floor((Date.now() - started.current) / 1000)),
       1000,
@@ -103,6 +110,7 @@ export function Conversation({
       mounted.current = false;
       autoVoiceRef.current = false;
       clearInterval(timer);
+      clearTimeout(opening);
       request.current?.abort();
       listening.current?.abort();
       output.cancel();
@@ -111,10 +119,21 @@ export function Conversation({
     };
   }, []);
   async function play(text: string) {
-    setState("SPEAKING");
+    setState("THINKING");
     try {
       await speechOutput.current.textToSpeech(text, {
         rate: student.level === "A1" ? 0.85 : 0.95,
+        onStart: () => {
+          if (mounted.current && !endingRef.current) setState("SPEAKING");
+        },
+        onSentence: (sentence) => {
+          if (mounted.current && !endingRef.current)
+            setCurrentSentence(sentence);
+        },
+        onFallback: () => {
+          if (mounted.current)
+            setVoiceNotice("Using the browser voice for now.");
+        },
       });
     } catch (e) {
       if (mounted.current)
@@ -264,6 +283,7 @@ export function Conversation({
       turnsRef.current = nextTurns;
       setTurns(nextTurns);
       setDraft("");
+      setCurrentSentence(speechSentences(reply.message)[0] || reply.message);
       if (soundEnabled.current && !controller.signal.aborted)
         await play(reply.message);
     } catch (e) {
@@ -309,297 +329,179 @@ export function Conversation({
     const timer = setTimeout(() => startListening(), 450);
     return () => clearTimeout(timer);
   }, [autoVoice, textMode, state, latest, ending, error]);
-  const statusLabel = {
-    READY: latest ? "Your turn. Take your time." : "Ready when you are.",
-    LISTENING: speakingDetected
-      ? "I’m listening…"
-      : draft
-        ? "A short pause sends your answer."
-        : "Go ahead, I’m listening.",
-    THINKING: "Thinking of a reply…",
-    SPEAKING: "Your tutor is speaking…",
-  }[state];
   return (
-    <main className="conversation-main">
-      <div className="session-top">
-        <div className="session-title">
-          <span className={`topic-icon ${topic.color}`}>
-            <TopicIcon name={topic.icon} />
-          </span>
-          <div>
-            <span className="eyebrow">LET’S TALK ABOUT</span>
-            <h1>{topic.title}</h1>
+    <main className="talk-screen">
+      <div className="talk-context">
+        <span>{topic.title}</span>
+        <span aria-hidden>·</span>
+        <span>{student.level}</span>
+        {demo && <span className="demo-label">Demo · sample replies</span>}
+      </div>
+      <div
+        className={`talk-portrait ${state === "SPEAKING" ? "is-speaking" : ""}`}
+      >
+        <img
+          src="/teacher.jpg"
+          alt="Your AI tutor, inspired by your teacher’s lessons"
+        />
+      </div>
+      <div className="spoken-sentence" aria-live="polite">
+        {currentSentence ||
+          (state === "THINKING" ? "One moment…" : "Ready to talk?")}
+      </div>
+      <div className="talk-status" role="status">
+        <span className={`state-dot ${state.toLowerCase()}`} />
+        {ending
+          ? "Finishing your practice…"
+          : state === "LISTENING"
+            ? speakingDetected
+              ? "Listening…"
+              : "Listening · take your time"
+            : state === "THINKING"
+              ? "Thinking…"
+              : state === "SPEAKING"
+                ? "Speaking…"
+                : "Ready when you are"}
+      </div>
+      {(error || voiceNotice) && (
+        <p className="talk-notice" role={error ? "alert" : "status"}>
+          {error || voiceNotice}
+        </p>
+      )}
+      {seconds >= 600 && (
+        <p className="talk-notice">
+          Ten minutes of practice. Finish your thought, then tap End.
+        </p>
+      )}
+      <div className="talk-controls">
+        {!textMode && (
+          <div className="talk-mic">
+            <button
+              className={`mic-button ${state === "LISTENING" ? "is-listening" : ""}`}
+              onClick={microphone}
+              disabled={(!autoVoice && state !== "READY") || ending || !latest}
+              aria-label={autoVoice ? "Pause microphone" : "Resume microphone"}
+              aria-pressed={autoVoice}
+            >
+              {autoVoice ? <Square size={25} /> : <Mic size={29} />}
+            </button>
+            <span>{autoVoice ? "Tap to pause" : "Tap to speak"}</span>
           </div>
-        </div>
-        <div className="session-meta">
-          <span className="level-badge">{student.level}</span>
-          <span>{student.name}</span>
-          <span className="session-timer">
+        )}
+        {textMode && (
+          <form
+            className="text-practice"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void send();
+            }}
+          >
+            <label htmlFor="student-answer">Your answer</label>
+            <div className="composer">
+              <textarea
+                id="student-answer"
+                placeholder="Type your answer…"
+                value={draft}
+                maxLength={1800}
+                rows={2}
+                onChange={(e) => setDraft(e.target.value)}
+                disabled={ending || state === "THINKING"}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void send();
+                  }
+                }}
+              />
+              <button
+                type="submit"
+                aria-label="Send answer"
+                disabled={
+                  !draft.trim() || state !== "READY" || ending || !latest
+                }
+              >
+                <ArrowUp size={21} />
+              </button>
+            </div>
+          </form>
+        )}
+        {!textMode && draft && state === "LISTENING" && (
+          <p className="heard-words">{draft}</p>
+        )}
+        {!latest && error && (
+          <button
+            className="quiet"
+            onClick={() => void send(true)}
+            disabled={state !== "READY" || ending}
+          >
+            Try again
+          </button>
+        )}
+        <div className="talk-footer">
+          <span
+            className="talk-timer"
+            aria-label={`Conversation duration ${formatTime(seconds)}`}
+          >
             <Clock3 size={16} />
-            {formatTime(seconds)} <small>/ 10:00</small>
+            {formatTime(seconds)}
           </span>
-          <button className="end-button" onClick={end} disabled={ending}>
-            {ending ? (
-              <LoaderCircle size={16} className="spin" />
-            ) : (
-              <Square size={13} />
-            )}{" "}
-            {ending ? "Making your recap…" : "End session"}
+          <button
+            className="quiet end-talk"
+            onClick={() => void end()}
+            disabled={ending}
+          >
+            End
           </button>
         </div>
       </div>
-      {demo && (
-        <div className="demo-banner">
-          <Sparkles size={15} />
-          <span>
-            Demo mode · Sample replies let you explore. Connect an API key for
-            real AI conversations and corrections.
-          </span>
-        </div>
-      )}
-      <div className="conversation-grid">
-        <section
-          className={`tutor-portrait ${state === "SPEAKING" ? "speaking" : ""}`}
+      <div className="talk-secondary">
+        <button className="quiet" onClick={() => setTranscript(true)}>
+          <BookOpen size={16} />
+          Transcript
+        </button>
+        <button
+          className="quiet"
+          onClick={toggleMode}
+          disabled={
+            (state !== "READY" && state !== "LISTENING") ||
+            ending ||
+            (!inputAvailable && textMode)
+          }
         >
-          <img
-            src="/teacher.jpg"
-            alt="The teacher whose lessons inspire your AI English tutor"
-          />
-          <div className="portrait-shade" />
-          <span className="ai-badge">
-            <Sparkles size={13} /> AI PRACTICE TUTOR
-          </span>
-          <div className="portrait-caption">
-            <h2>
-              A friendly face.
-              <br />A space to speak.
-            </h2>
-            <p>
-              Inspired by your teacher’s lessons.
-              <br />
-              An AI tutor, with a voice of its own.
-            </p>
+          {textMode ? <Mic size={16} /> : <Keyboard size={16} />}{" "}
+          {textMode ? "Voice mode" : "Text mode"}
+        </button>
+        <button
+          className="quiet icon-control"
+          aria-label={sound ? "Mute tutor" : "Enable tutor voice"}
+          onClick={toggleSound}
+        >
+          {sound ? <Volume2 size={18} /> : <VolumeX size={18} />}
+        </button>
+      </div>
+      <p className="talk-disclosure">AI practice tutor · Synthetic voice</p>
+      {transcript && (
+        <Modal title="Your conversation" onClose={() => setTranscript(false)}>
+          <div className="transcript transcript-sheet">
+            {turns.map((turn, i) => (
+              <div className="transcript-turn" key={i}>
+                <strong>
+                  {turn.role === "user" ? student.name : "AI tutor"}
+                </strong>
+                <p>{turn.content}</p>
+              </div>
+            ))}
           </div>
           <button
-            className="sound-button"
-            aria-label={sound ? "Mute tutor" : "Enable tutor voice"}
-            onClick={toggleSound}
+            className="quiet"
+            onClick={() => void replay()}
+            disabled={state !== "READY" || ending || !latest}
           >
-            {sound ? <Volume2 size={19} /> : <VolumeX size={19} />}
+            <Volume2 size={16} />
+            Hear the latest reply again
           </button>
-        </section>
-        <section className="conversation-panel">
-          <div className="conversation-panel-top">
-            <span>
-              <MessageCircle size={17} /> Your conversation
-            </span>
-            <button
-              className="quiet"
-              onClick={() => setTranscript(!transcript)}
-            >
-              <BookOpen size={16} />
-              {transcript ? "Hide" : "Show"} transcript
-            </button>
-          </div>
-          <div className="message-space" aria-live="polite">
-            <span className={`state-label ${state.toLowerCase()}`}>
-              <span />
-              {state === "READY" ? "READY" : state}
-            </span>
-            <div className="tutor-message">
-              {latest?.content || "A little conversation starts with a hello."}
-            </div>
-            {state === "THINKING" && (
-              <div className="thinking-dots">
-                <i />
-                <i />
-                <i />
-              </div>
-            )}
-            {latest && speechOutput.current.supported() && (
-              <button
-                className="quiet replay-button"
-                onClick={() => void replay()}
-                disabled={state !== "READY" || ending}
-              >
-                <Volume2 size={15} /> Hear again
-              </button>
-            )}
-            {latest?.corrections?.length ? (
-              <div className="correction-note">
-                <Check size={15} /> A little correction, a little progress.
-              </div>
-            ) : null}
-          </div>
-          {transcript && (
-            <div
-              className="transcript"
-              tabIndex={0}
-              aria-label="Conversation transcript"
-            >
-              {turns.length ? (
-                turns.map((t, i) => (
-                  <div className={`transcript-turn ${t.role}`} key={i}>
-                    <strong>
-                      {t.role === "user" ? student.name : "AI tutor"}
-                    </strong>
-                    <p>{t.content}</p>
-                  </div>
-                ))
-              ) : (
-                <p>Your conversation will appear here.</p>
-              )}
-            </div>
-          )}
-          {error && (
-            <div className="error" role="alert">
-              {error} Your message is kept below so you can try again.
-            </div>
-          )}
-          {voiceNotice && (
-            <div className="notice" role="status">
-              {voiceNotice}
-            </div>
-          )}
-          {seconds >= 600 && (
-            <div className="notice">
-              That’s about ten minutes of practice. Finish your thought, then
-              end the session for your recap.
-            </div>
-          )}
-          <div className="input-area">
-            {!latest ? (
-              <div className="begin-area">
-                <p>{statusLabel}</p>
-                <button
-                  className="primary"
-                  onClick={() => send(true)}
-                  disabled={state !== "READY" || ending}
-                >
-                  {state === "THINKING" ? (
-                    <LoaderCircle size={19} className="spin" />
-                  ) : (
-                    <MessageCircle size={19} />
-                  )}{" "}
-                  Say hello
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="input-switch">
-                  <span>{statusLabel}</span>
-                  <button
-                    className="quiet"
-                    onClick={toggleMode}
-                    disabled={
-                      (state !== "READY" && state !== "LISTENING") ||
-                      (!inputAvailable && textMode) ||
-                      ending
-                    }
-                  >
-                    {textMode ? <Mic size={15} /> : <Keyboard size={15} />}{" "}
-                    {textMode ? "Voice mode" : "Text mode"}
-                  </button>
-                </div>
-                {!textMode && (
-                  <div className="mic-area">
-                    <button
-                      className={`mic-button ${state === "LISTENING" ? "is-listening" : ""}`}
-                      onClick={microphone}
-                      disabled={(!autoVoice && state !== "READY") || ending}
-                      aria-label={
-                        autoVoice
-                          ? "Pause conversation"
-                          : "Start hands-free conversation"
-                      }
-                    >
-                      {autoVoice ? <Square size={25} /> : <Mic size={28} />}
-                    </button>
-                    <p>
-                      {autoVoice
-                        ? "Hands-free is on · Tap to pause"
-                        : "Start hands-free conversation"}
-                    </p>
-                  </div>
-                )}
-                {!textMode && autoVoice ? (
-                  <div className="live-voice-draft">
-                    <span>
-                      {state === "LISTENING"
-                        ? "YOUR WORDS"
-                        : "HANDS-FREE CONVERSATION"}
-                    </span>
-                    <p>
-                      {draft ||
-                        (state === "LISTENING"
-                          ? "Speak naturally. I’ll wait for a 3-second pause."
-                          : "Listening resumes after the tutor’s reply.")}
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        void send();
-                      }}
-                      className="composer"
-                    >
-                      <textarea
-                        aria-label="Your message"
-                        placeholder={
-                          textMode
-                            ? "Type your answer here…"
-                            : "Your words will appear here…"
-                        }
-                        value={draft}
-                        maxLength={1800}
-                        onChange={(e) => setDraft(e.target.value)}
-                        rows={2}
-                        disabled={
-                          ending ||
-                          state === "THINKING" ||
-                          state === "LISTENING"
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            void send();
-                          }
-                        }}
-                      />
-                      <button
-                        type="submit"
-                        aria-label="Send message"
-                        disabled={!draft.trim() || state !== "READY" || ending}
-                      >
-                        <ArrowUp size={21} />
-                      </button>
-                    </form>
-                    <div className="composer-hint">
-                      <span>
-                        {textMode
-                          ? "Enter to send · Shift + Enter for a new line"
-                          : "Resume the microphone for hands-free practice."}
-                      </span>
-                      <span>{draft.length}/1800</span>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-      </div>
-      <div className="conversation-foot">
-        <span>
-          <Check size={15} /> There’s no rush. Mistakes help us learn.
-        </span>
-        <span>
-          {textMode ? "Text mode" : "Hands-free voice"}
-          <ChevronDown size={13} />
-        </span>
-      </div>
+        </Modal>
+      )}
     </main>
   );
 }

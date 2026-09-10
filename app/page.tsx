@@ -3,17 +3,16 @@ import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  Clock3,
   History,
   MessageCircle,
   ShieldCheck,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { topics, getTopic } from "@/lib/tutor/topics";
 import { TopicIcon } from "@/components/icons";
 import { Modal } from "@/components/modal";
 import { useTopicTool } from "@/components/use-topic-tool";
+import { TutorVoice } from "@/lib/voice";
 import { Conversation } from "@/components/conversation";
 import { ReportView, formatTime } from "@/components/report-view";
 import type { Level, SavedSession, Student, Turn } from "@/lib/types";
@@ -26,6 +25,8 @@ import {
 } from "@/lib/storage";
 import { localReport, parseReport } from "@/lib/tutor/report";
 export default function Home() {
+  const [initialTextMode, setInitialTextMode] = useState(false);
+  const [voice] = useState(() => new TutorVoice());
   const [selected, setSelected] = useState("animals");
   const [student, setStudent] = useState<Student>({
     name: "",
@@ -48,6 +49,9 @@ export default function Home() {
   const topic = getTopic(selected)!;
   useTopicTool(setSelected, view === "home");
   useEffect(() => {
+    setInitialTextMode(
+      new URLSearchParams(window.location.search).get("mode") === "text",
+    );
     try {
       setAck(hasAcknowledgement());
       setSessions(getSessions());
@@ -56,7 +60,7 @@ export default function Home() {
         "Browser storage is unavailable or unreadable. New practice can still run, but history may not save.",
       );
     }
-    fetch("/api/tutor")
+    fetch("/api/tutor", { signal: AbortSignal.timeout(5000) })
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();
@@ -85,6 +89,7 @@ export default function Home() {
       return;
     }
     setNotice("");
+    voice.unlock();
     setView("conversation");
   }
   function accept() {
@@ -98,6 +103,7 @@ export default function Home() {
       );
     }
     setGuardian(false);
+    voice.unlock();
     setView("conversation");
   }
   async function finish(turns: Turn[], duration: number) {
@@ -161,7 +167,9 @@ export default function Home() {
     }
   }
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell ${view === "conversation" ? "in-conversation" : ""}`}
+    >
       <header className="header">
         <a
           className="brand"
@@ -181,200 +189,117 @@ export default function Home() {
             <MessageCircle size={25} />
           </span>
           little<span>talk</span>
-          <span className="brand-divider" />
-          <small>ENGLISH, ONE CONVERSATION AT A TIME</small>
         </a>
-        <button
-          className="quiet"
-          disabled={view === "conversation"}
-          onClick={() => {
-            setView(view === "history" ? "home" : "history");
-            setNotice("");
-          }}
-        >
-          <History size={18} /> My practice
-          {sessions.length > 0 && (
-            <span className="history-count">{sessions.length}</span>
-          )}
-        </button>
+        {view !== "conversation" && (
+          <button
+            className="quiet"
+            onClick={() => {
+              setView(view === "history" ? "home" : "history");
+              setNotice("");
+            }}
+          >
+            <History size={18} /> My practice
+            {sessions.length > 0 && (
+              <span className="history-count">{sessions.length}</span>
+            )}
+          </button>
+        )}
       </header>
       {view === "home" && (
-        <main className="home-main">
-          <div className="intro">
-            <div>
-              <div className="eyebrow">
-                A LITTLE PRACTICE. A LITTLE MORE CONFIDENCE.
-              </div>
-              <h1>What shall we talk about?</h1>
-              <p>Pick something you like. Let’s turn it into a conversation.</p>
+        <main className="start-screen">
+          <figure className="start-portrait">
+            <img
+              src="/teacher.jpg"
+              alt="The teacher whose lessons inspire your AI English tutor"
+            />
+            <figcaption>
+              AI English practice, inspired by your teacher.
+            </figcaption>
+          </figure>
+          <form
+            className="start-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              start();
+            }}
+          >
+            <h1>
+              What shall we talk
+              <br className="desktop-break" /> about today?
+            </h1>
+            <label htmlFor="nickname">Nickname</label>
+            <input
+              id="nickname"
+              autoComplete="off"
+              placeholder="What should we call you?"
+              required
+              maxLength={24}
+              value={student.name}
+              onChange={(e) => setStudent({ ...student, name: e.target.value })}
+            />
+            <div className="profile-fields">
+              <label>
+                Age
+                <select
+                  value={student.age}
+                  onChange={(e) =>
+                    setStudent({ ...student, age: Number(e.target.value) })
+                  }
+                >
+                  {[8, 9, 10, 11, 12, 13, 14].map((age) => (
+                    <option key={age}>{age}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                English level
+                <select
+                  value={student.level}
+                  onChange={(e) =>
+                    setStudent({ ...student, level: e.target.value as Level })
+                  }
+                >
+                  <option>A1</option>
+                  <option>A2</option>
+                  <option>B1</option>
+                </select>
+              </label>
             </div>
-            <span className="duration-pill">
-              <Clock3 size={16} /> About 10 minutes
-            </span>
-          </div>
-          {notice && (
-            <div className="notice" role="status">
-              {notice}
-            </div>
-          )}
-          <div className="home-grid">
-            <section aria-label="Conversation topics">
-              <div className="section-label">
-                <h2>Choose your topic</h2>
-                <span>10 ways to start talking</span>
-              </div>
-              <div className="topic-grid">
+            <fieldset className="topic-picker">
+              <legend>Choose a topic</legend>
+              <div className="compact-topics">
                 {topics.map((t) => (
                   <button
+                    type="button"
                     key={t.id}
-                    onClick={() => setSelected(t.id)}
+                    className={`compact-topic ${selected === t.id ? "selected" : ""}`}
                     aria-pressed={selected === t.id}
-                    className={`topic-card ${selected === t.id ? "selected" : ""}`}
+                    onClick={() => setSelected(t.id)}
                   >
-                    <span className={`topic-icon ${t.color}`}>
-                      <TopicIcon name={t.icon} />
-                    </span>
-                    <span className="topic-title">{t.title}</span>
-                    <span className="topic-description">{t.description}</span>
-                    <span className="topic-check" aria-hidden>
-                      {selected === t.id ? "✓" : "↗"}
-                    </span>
+                    <TopicIcon name={t.icon} size={19} />
+                    {t.title}
                   </button>
                 ))}
               </div>
-            </section>
-            <aside className="setup-panel">
-              <div className="portrait-preview">
-                <img
-                  src="/teacher.jpg"
-                  alt="The English teacher whose lessons inspire the AI tutor"
-                />
-                <span className="ai-badge">
-                  <Sparkles size={13} /> AI PRACTICE TUTOR
-                </span>
-              </div>
-              <form
-                className="setup-body"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  start();
-                }}
-              >
-                <span className="eyebrow">
-                  A FAMILIAR FACE. A FRIENDLY SPACE.
-                </span>
-                <h2>Your conversation starts here.</h2>
-                <p>
-                  An AI tutor inspired by your teacher’s lessons. Take your
-                  time, try things out, and be yourself.
-                </p>
-                <div className="setup-rule" />
-                <label>
-                  What should we call you?
-                  <input
-                    autoComplete="off"
-                    placeholder="First name or nickname"
-                    maxLength={24}
-                    required
-                    value={student.name}
-                    onChange={(e) =>
-                      setStudent({ ...student, name: e.target.value })
-                    }
-                  />
-                </label>
-                <div className="two-fields">
-                  <label>
-                    Age
-                    <select
-                      value={student.age}
-                      onChange={(e) =>
-                        setStudent({ ...student, age: Number(e.target.value) })
-                      }
-                    >
-                      {[8, 9, 10, 11, 12, 13, 14].map((a) => (
-                        <option key={a}>{a}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    English level
-                    <select
-                      value={student.level}
-                      onChange={(e) =>
-                        setStudent({
-                          ...student,
-                          level: e.target.value as Level,
-                        })
-                      }
-                    >
-                      <option value="A1">A1 · Beginner</option>
-                      <option value="A2">A2 · Elementary</option>
-                      <option value="B1">B1 · Intermediate</option>
-                    </select>
-                  </label>
-                </div>
-                <p className="level-help">
-                  {student.level === "A1"
-                    ? "Simple words and short sentences."
-                    : student.level === "A2"
-                      ? "Everyday chats and a little more detail."
-                      : "Share ideas, stories, and opinions."}
-                </p>
-                {configured === false && (
-                  <div className="setup-demo">
-                    <Sparkles size={14} />
-                    <span>Demo mode · Explore with sample replies.</span>
-                    <details>
-                      <summary>Connect live AI</summary>
-                      <p>
-                        Set OPENAI_API_KEY in server settings and restart or
-                        redeploy the app. Demo replies do not assess your
-                        English.
-                      </p>
-                    </details>
-                  </div>
-                )}
-                {configured && (
-                  <label className="check-label demo-check">
-                    <input
-                      type="checkbox"
-                      checked={demo}
-                      onChange={(e) => setDemo(e.target.checked)}
-                    />
-                    Use demo replies (no AI calls)
-                  </label>
-                )}
-                {formError && (
-                  <p className="error" role="alert">
-                    {formError}
-                  </p>
-                )}
-                <button
-                  className="primary start-button"
-                  disabled={configured === null}
-                >
-                  {configured === null
-                    ? "Checking connection…"
-                    : `Let’s talk about ${topic.title}`}{" "}
-                  <ArrowRight size={18} />
-                </button>
-                <span className="under-button">
-                  <MessageCircle size={14} /> A little conversation goes a long
-                  way
-                </span>
-              </form>
-            </aside>
-          </div>
-          <footer className="footer">
-            <span>
-              <ShieldCheck size={17} /> A safe space to find your voice.
-            </span>
-            <span>No accounts. No saved recordings. Just practice.</span>
-          </footer>
+            </fieldset>
+            {formError && (
+              <p className="error" role="alert">
+                {formError}
+              </p>
+            )}
+            <button
+              className="primary start-talking"
+              disabled={configured === null}
+            >
+              Start talking <ArrowRight size={19} />
+            </button>
+          </form>
         </main>
       )}
       {view === "conversation" && (
         <Conversation
+          voice={voice}
+          initialTextMode={initialTextMode}
           student={student}
           topic={topic}
           demo={demo}
@@ -492,7 +417,8 @@ export default function Home() {
             <li>
               The app never records or saves microphone audio. Browser speech
               recognition may send audio to the browser provider for processing.
-              The tutor uses a synthetic voice.
+              The tutor uses a synthetic voice. When custom voice is enabled,
+              tutor text is sent to ElevenLabs to generate speech.
             </li>
           </ul>
           <label className="check-label">

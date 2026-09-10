@@ -15,7 +15,7 @@ export function buildTutorPrompt(
       `Topic material (choose only relevant questions): ${JSON.stringify({ title: topic.title, starterQuestions: topic.starterQuestions, followUpQuestions: topic.followUpQuestions, targetVocabulary: topic.targetVocabulary, grammarFocus: topic.grammarFocus })}`,
     ].join("\n\n"),
     input: turns.length
-      ? turns.slice(-24).map((t) => ({ role: t.role, content: t.content }))
+      ? turns.slice(-120).map((t) => ({ role: t.role, content: t.content }))
       : [
           {
             role: "user" as const,

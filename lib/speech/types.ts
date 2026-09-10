@@ -12,6 +12,9 @@ export interface SpeechToTextService {
 }
 export interface TextToSpeechService {
   supported(): boolean;
-  textToSpeech(text: string, options?: { rate?: number }): Promise<void>;
+  textToSpeech(
+    text: string,
+    options?: { rate?: number; onStart?: () => void },
+  ): Promise<void>;
   cancel(): void;
 }

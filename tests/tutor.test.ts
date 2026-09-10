@@ -37,8 +37,8 @@ test("prompt separates instructions, level and bounded conversation context", ()
     content: `turn ${i}`,
   }));
   const prompt = buildTutorPrompt(student, topics[0], turns);
-  assert.equal(prompt.input.length, 24);
-  assert.equal(prompt.input[0].content, "turn 6");
+  assert.equal(prompt.input.length, 30);
+  assert.equal(prompt.input[0].content, "turn 0");
   assert.match(prompt.instructions, /EVERY meaningful/);
   assert.match(prompt.instructions, /exactly ONE/);
   assert.match(prompt.instructions, /Student age: 10/);
@@ -92,4 +92,38 @@ test("local recap is grounded in actual turns and does not invent new words", ()
   assert.deepEqual(recap.newVocabulary, ["fluffy"]);
   assert.equal(recap.source, "demo");
   assert.equal(recap.duration, 42);
+});
+
+test("demo questions never cycle across an extended session in any topic", () => {
+  for (const topic of topics) {
+    const turns: import('../lib/types').Turn[] = [];
+    const seen = new Set<string>();
+    for (let i = 0; i < 24; i++) {
+      const reply = demoReply(topic, turns);
+      if (!reply.message.includes('?')) {
+        assert.match(reply.message, /Tap End/);
+        break;
+      }
+      assert.ok(!seen.has(reply.message), `${topic.id} repeated ${reply.message}`);
+      seen.add(reply.message);
+      turns.push({ role: 'assistant', content: reply.message });
+      turns.push({ role: 'user', content: 'I am not sure.' });
+    }
+    assert.ok(seen.size >= 12, topic.id);
+  }
+});
+
+test("repeated keywords do not repeat facts or equivalent questions", () => {
+  for (const [topic, answer] of [[topics[0], 'Dolphins are cute.'], [topics[4], 'I like pizza.']] as const) {
+    const turns: import('../lib/types').Turn[] = [{ role: 'assistant', content: demoReply(topic, []).message }];
+    const replies: string[] = [];
+    for (let i = 0; i < 8; i++) {
+      turns.push({ role: 'user', content: answer });
+      const reply = demoReply(topic, turns);
+      replies.push(reply.message);
+      turns.push({ role: 'assistant', content: reply.message });
+    }
+    assert.equal(new Set(replies).size, replies.length);
+    assert.equal(replies.filter(r => /Why do you like|What do you like on/.test(r)).length, 1);
+  }
 });
