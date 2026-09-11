@@ -1,0 +1,88 @@
+{
+  "generatedWith": "built-in image_gen",
+  "generationCalls": 9,
+  "promptSet": "/Users/sabrigokmen/.codex/generated_images/little-talk-topics-prompts.json",
+  "assets": [
+    {
+      "topic": "my-town",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-1b973680-4fd6-4198-ae28-0e41003221fa.png",
+      "reviewNotes": "Correct subjects, colors and order. Top buildings reach about y50\u201351%, school flag reaches y2%; park begins about y53%. Faint extra town buildings, plants and a bicycle basket appear. Main clusters remain separate.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2447784,
+      "appPath": "/scenes/topics/my-town-v1.jpg"
+    },
+    {
+      "topic": "daily-routines",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-1462c35f-6e07-486b-9808-18f66e5495b6.png",
+      "reviewNotes": "Correct subjects, colors and order. Toothbrush begins about y5%; bed extends to x35% and starts y52%, backpack starts y50%. Book has blank cream pages with clearly visible red cover. Small sun/moon/plant hints.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2038170,
+      "appPath": "/scenes/topics/daily-routines-v1.jpg"
+    },
+    {
+      "topic": "hobbies",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-ede16004-e915-4c1d-b00b-fbb5739d39c4.png",
+      "reviewNotes": "Correct subjects, colors and order. Guitar is warm honey brown and reaches y3%; kite starts near y50%, with tail extending to y94%. Bicycle extends x1\u201332%; blue book x34\u201366%. Main objects remain separate.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2145426,
+      "appPath": "/scenes/topics/hobbies-v1.jpg"
+    },
+    {
+      "topic": "food",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-d4a41138-e7a7-41e5-b3d6-4d27a70333b2.png",
+      "reviewNotes": "Correct subjects and order. Jug is clear glass filled with opaque white milk, rather than an opaque white vessel; juice is golden orange. Egg is one whole egg plus a cut half as one cluster. Apple leaf begins around y3%; jug and juice glass begin around y50\u201352%.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2013126,
+      "appPath": "/scenes/topics/food-v1.jpg"
+    },
+    {
+      "topic": "family",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-46adddf4-801a-42a0-bb66-4493f940225a.png",
+      "reviewNotes": "Correct six characters, clothing colors and order; baby has white clothing and brown teddy. Portraits are larger than requested regions: top row spans roughly y2\u201350%, bottom row starts y52% and torsos crop at the bottom edge. Faint living-room furnishings behind.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2429636,
+      "appPath": "/scenes/topics/family-v1.jpg"
+    },
+    {
+      "topic": "school",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-24726276-7a48-4879-895a-5dde9e3e5990.png",
+      "reviewNotes": "Correct six main objects, colors and order; ruler has ticks without numbers, scissors have rounded tips. Backpack starts around y2%; notebook begins around y50%; ruler extends to x35%. Faint extra books appear at far upper-right and plants at upper edges. Backpack has a plain decorative diamond patch.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2266979,
+      "appPath": "/scenes/topics/school-v1.jpg"
+    },
+    {
+      "topic": "holiday",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-cf2821a5-8742-44ed-90a3-892fcda4fdd8.png",
+      "reviewNotes": "Correct six subjects, colors and order, including white sail/hull and solid red ball. Tent extends about x2\u201336%; kite runs y2\u201350% including tail; boat mast begins y52%. Beach/sea background is more prominent than requested faint hints.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2146912,
+      "appPath": "/scenes/topics/holiday-v1.jpg"
+    },
+    {
+      "topic": "feelings",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-73d80223-6326-4d97-b1b0-2f7df218e05d.png",
+      "reviewNotes": "All six emotions, clothing colors and order are clear; friendly diverse children, no text. Portraits larger than specified regions: top row roughly y1\u201348%, bottom row y50\u201396%; happy child's hair extends to x1%. Main portraits remain separate.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2342845,
+      "appPath": "/scenes/topics/feelings-v1.jpg"
+    },
+    {
+      "topic": "home",
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-f74fa6c2-5f0a-495f-87d3-ca87214bea0c.png",
+      "reviewNotes": "Correct six main furnishings, colors and order. Sofa extends about x32\u201367%; bed x3\u201333%, rug x67\u201398%. A small plant is added on the bookshelf. All main furnishings remain separate.",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1981798,
+      "appPath": "/scenes/topics/home-v1.jpg"
+    }
+  ]
+}

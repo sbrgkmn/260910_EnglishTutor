@@ -201,6 +201,9 @@ test("configured ElevenLabs playback goes through same-origin audio and falls ba
   await voice.textToSpeech("How are you?", { onFallback: () => fallbacks++ });
   assert.equal(fallbacks, 1);
   assert.deepEqual(spoken, ["How are you?"]);
+  fail = false;
+  await voice.textToSpeech("Can you find the bus?");
+  assert.equal(played.length, 2, "a temporary failure must not permanently replace Sam's Voice");
 });
 test("cancelling custom speech aborts generation and never starts playback", async (t) => {
   const { played } = installAudioFakes(t);
@@ -221,4 +224,64 @@ test("cancelling custom speech aborts generation and never starts playback", asy
   await pending;
   assert.equal(signal?.aborted, true);
   assert.deepEqual(played, []);
+});
+
+test("starting My Town after another lesson cannot mistake silent activation for completed speech", async (t) => {
+  const { played } = installAudioFakes(t);
+  t.mock.method(globalThis, "fetch", async (_url: unknown, init?: RequestInit) =>
+    init?.method === "POST"
+      ? new Response(new Uint8Array([73, 68, 51]), { headers: { "Content-Type": "audio/mpeg" } })
+      : Response.json({ provider: "elevenlabs" }),
+  );
+  const voice = new TutorVoice();
+  await voice.textToSpeech("What food can you see?");
+  voice.unlock();
+  const started: string[] = [];
+  await voice.textToSpeech("What places and things can you see in this town?", {
+    onSentence: (text) => started.push(text),
+  });
+  assert.equal(played.filter((src) => src.startsWith("blob:")).length, 2);
+  assert.deepEqual(started, ["What places and things can you see in this town?"]);
+});
+
+test("older mobile browsers without Intl.Segmenter retain the full spoken question", (t) => {
+  t.mock.property(Intl, "Segmenter", undefined);
+  assert.deepEqual(speechSentences("Look at the town. What can you see?"), ["Look at the town. What can you see?"]);
+});
+
+test("mobile autoplay rejection settles promptly and preserves custom voice for a fresh tap", async (t) => {
+  const { spoken, played } = installAudioFakes(t);
+  const originalPlay = Audio.prototype.play;
+  let blocked = true;
+  t.mock.method(Audio.prototype, "play", function (this: HTMLAudioElement) {
+    if (blocked && this.src.startsWith("blob:")) return Promise.reject(new DOMException("Tap to play", "NotAllowedError"));
+    return originalPlay.call(this);
+  });
+  t.mock.method(globalThis, "fetch", async (_url: unknown, init?: RequestInit) =>
+    init?.method === "POST"
+      ? new Response(new Uint8Array([73, 68, 51]), { headers: { "Content-Type": "audio/mpeg" } })
+      : Response.json({ provider: "elevenlabs" }),
+  );
+  const voice = new TutorVoice();
+  await assert.rejects(voice.textToSpeech("Can you find the bus?"), { name: "NotAllowedError" });
+  assert.deepEqual(spoken, []);
+  blocked = false;
+  voice.unlock();
+  await voice.textToSpeech("Can you find the bus?");
+  assert.equal(played.filter((s) => s.startsWith("blob:")).length, 1);
+});
+
+test("stalled audio startup releases the pending request within twelve seconds", async (t) => {
+  installAudioFakes(t);
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let signal: AbortSignal | undefined;
+  t.mock.method(globalThis, "fetch", async (_url: unknown, init: RequestInit) => {
+    signal = init.signal as AbortSignal;
+    return new Promise<Response>((_resolve, reject) => signal!.addEventListener("abort", () => reject(new Error("aborted"))));
+  });
+  const pending = new ElevenLabsVoiceProvider().textToSpeech("Hello!");
+  const rejected = assert.rejects(pending, /could not start/);
+  t.mock.timers.tick(12000);
+  await rejected;
+  assert.equal(signal?.aborted, true);
 });

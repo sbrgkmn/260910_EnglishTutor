@@ -1,6 +1,16 @@
-# Little Talk
+# Starkids
 
-An experimental English speaking-practice MVP for ages 8–14 and CEFR A1–B1. Built with Next.js App Router, React, TypeScript and Tailwind CSS. It uses a teacher photograph as a familiar visual, clearly identifies the tutor as AI, and supports browser speech or an ElevenLabs voice configured by the owner. The interface identifies the tutor and voice as AI-generated.
+The current MVP offers **Animals, Food, Home, Hobbies, School and My Town** as six-step picture conversations, with teacher expressions, Sam’s Voice and automatic speech submission. See [the activity guide](docs/visual-activities.md).
+
+An experimental English speaking-practice MVP for ages 7–12 and CEFR A1–B1. Built with Next.js App Router, React, TypeScript and Tailwind CSS. It uses an illustrated teacher sprite pack derived from the supplied photograph, clearly identifies the tutor as AI, and supports browser speech or an ElevenLabs voice configured by the owner. The start screen identifies the practice teacher as AI.
+
+## Visual game iteration
+
+Every MVP topic opens a picture game with six questions, authored tap targets, gentle corrections, session stars, a choice-specific follow-up, and a simple celebration. A2/B1 add action prompts; Animals also includes a memory variant. All nine teacher expressions are fixed assets; they follow listening, processing, audio, feedback and completion.
+
+See [Visual activities](docs/visual-activities.md) for the code map, exact 100-star test sequence, image provider/cache setup and limitations. See [Teacher sprite generation](docs/teacher-sprite-generation.md) for asset paths, authoring prompts and review workflow. Use `?mode=text&dev=true` to test without microphone access and open the sprite workshop.
+
+All six scenes and guided feedback work without new credentials. Optional live feedback uses `OPENAI_API_KEY`; optional scenic backgrounds use `IMAGE_PROVIDER=openai`, `IMAGE_API_KEY` and `IMAGE_MODEL`. Teacher sprites do not require runtime image generation. Sam’s Voice continues to use the existing ElevenLabs settings. The general conversation/report code and saved history remain available for future development; picture games keep points and transcripts only for the current session.
 
 ## Run locally
 
@@ -38,7 +48,7 @@ npm run build
 npm start
 ```
 
-The 22 automated tests cover tutoring validation, prompts and reports; speech recognition lifecycle and silence timing; voice selection, sentence sequencing, cancellation and browser fallback; and server-only ElevenLabs requests, audio responses and error redaction. A local browser check completed an Animals conversation in text mode through its recap, including a correction and the optional transcript. Browser speech playback lifecycle and layouts at 390px and 820px were checked. ElevenLabs transport is covered with mocked responses. A live test with the configured Sam’s Voice successfully returned MP3 audio through the application endpoint. Actual microphone accuracy and live teaching quality still need evaluation on the target devices.
+The automated tests cover tutoring validation, prompts and reports; speech recognition lifecycle and silence timing; voice selection, sentence sequencing, cancellation and browser fallback; and server-only ElevenLabs requests, audio responses and error redaction. A local browser check completed an Animals conversation in text mode through its recap, including a correction and the optional transcript. Browser speech playback lifecycle and layouts at 390px and 820px were checked. ElevenLabs transport is covered with mocked responses. A live test with the configured Sam’s Voice successfully returned MP3 audio through the application endpoint. Actual microphone accuracy and live teaching quality still need evaluation on the target devices.
 
 ## Where to edit
 
@@ -56,7 +66,7 @@ The 22 automated tests cover tutoring validation, prompts and reports; speech re
 - `lib/voice/server.ts` and `app/api/tts/route.ts`: server-only ElevenLabs configuration and audio endpoint.
 - `hosting/worker.ts`: the same tutor, report and voice handlers for Sites.
 - `lib/storage.ts`: local history and acknowledgement persistence.
-- `public/teacher.jpg`: the supplied teacher photograph. Replace this file to change the portrait.
+- `public/teacher.jpg` and `public/teacher-source.jpg`: the supplied identity reference; `public/teacher/sprites/` contains the generated pack used by the interface.
 - `app/globals.css`: shared palette, typography, layouts, responsive styles and reduced-motion support.
 
 The optional, feature-detected WebMCP `select_practice_topic` tool changes the same topic selection as the visible UI. It cannot start a session, acknowledge consent, access transcripts, or delete history. It is unavailable on browsers without this experimental API; supported-context validation has not been performed.
@@ -104,7 +114,7 @@ Keep the `SavedSession` type as the storage boundary. Replace `getSessions`, `sa
 
 `npm run build` produces both the normal Next.js production build and a Cloudflare-compatible Sites package in `dist/`. `npm run build:next` builds only Next.js. Local development continues to use `npm run dev`.
 
-The app currently has one prerendered page and no Next server actions, dynamic page routes, or server-rendered per-user content. `scripts/build-sites.mjs` packages that page with its exact Next client chunks and public assets. `hosting/worker.ts` serves static assets through the Sites `ASSETS` binding and routes `/api/tutor`, `/api/report` and `/api/tts` to shared server handlers in `lib/tutor/` and `lib/voice/server.ts`. Runtime secrets are passed explicitly from Worker bindings; no local environment values are included in the Worker bundle.
+The app currently has one prerendered page and no Next server actions, dynamic page routes, or server-rendered per-user content. `scripts/build-sites.mjs` packages that page with its exact Next client chunks and public assets. `hosting/worker.ts` serves static assets through the Sites `ASSETS` binding and routes `/api/tutor`, `/api/report`, `/api/tts`, `/api/activity` and `/api/activity/answer` to shared server handlers in `lib/tutor/` and `lib/voice/server.ts`. Runtime secrets are passed explicitly from Worker bindings; no local environment values are included in the Worker bundle.
 
 The public deployment defaults to demo mode. To enable live tutoring later, configure `OPENAI_API_KEY` as a Sites secret and optionally `OPENAI_MODEL` as a runtime variable, then redeploy. For ElevenLabs, add `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` as server-side Sites secrets and set the runtime variable `VOICE_PROVIDER=elevenlabs`. Local `.env.local` values are not uploaded or bundled. The GitHub repository does not automatically deploy Sites: push the same source revision to the Sites source repository, package the validated `dist/` output with the Sites helper, save a version for that exact commit, and deploy it. The Site identity is recorded in `.openai/hosting.json`.
 

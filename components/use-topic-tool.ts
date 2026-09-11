@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
-import { getTopic, topics } from "@/lib/tutor/topics";
+import { getPracticeTopic, topics } from "@/lib/tutor/topics";
 type ModelContext = {
   registerTool(
     tool: {
@@ -47,7 +47,7 @@ export function useTopicTool(onSelect: (id: string) => void, isHome: boolean) {
               const data = input as { topicId?: unknown };
               const topic =
                 typeof data?.topicId === "string"
-                  ? getTopic(data.topicId)
+                  ? getPracticeTopic(data.topicId)
                   : undefined;
               if (!topic) throw new Error("Choose a valid topic ID.");
               if (!current.current.isHome)

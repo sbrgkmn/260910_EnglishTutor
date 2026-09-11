@@ -10,7 +10,7 @@ export class ElevenLabsVoiceProvider implements VoiceProvider {
     return typeof window !== "undefined" && typeof Audio !== "undefined";
   }
   unlock() {
-    if (!this.supported()) return;
+    if (!this.supported() || this.active) return;
     this.audio ??= new Audio();
     // A tiny silent WAV primes this reusable media element inside the Start click.
     this.audio.src =
@@ -32,9 +32,10 @@ export class ElevenLabsVoiceProvider implements VoiceProvider {
     return new Promise((resolve, reject) => {
       let done = false;
       let objectUrl: string | undefined;
-      const timer = setTimeout(
-        () => settle(new Error("Voice playback timed out.")),
-        45000,
+      let playing = false;
+      let timer = setTimeout(
+        () => settle(new Error("Voice could not start. Tap Hear again to retry.")),
+        12000,
       );
       const settle = (error?: Error) => {
         if (done) return;
@@ -52,9 +53,6 @@ export class ElevenLabsVoiceProvider implements VoiceProvider {
         error ? reject(error) : resolve();
       };
       this.active = { controller, settle };
-      audio.onplaying = () => options.onStart?.();
-      audio.onended = () => settle();
-      audio.onerror = () => settle(new Error("Custom audio could not play."));
       void (async () => {
         try {
           const response = await fetch("/api/tts", {
@@ -72,7 +70,18 @@ export class ElevenLabsVoiceProvider implements VoiceProvider {
           if (done) return;
           if (!blob.size) throw new Error("Custom voice returned no audio.");
           objectUrl = URL.createObjectURL(blob);
+          // The Start click may still be finishing its silent unlock clip.
+          // Only listen to playback events once the actual lesson audio is ready.
           audio.src = objectUrl;
+          audio.onplaying = () => {
+            if (playing || done) return;
+            playing = true;
+            clearTimeout(timer);
+            timer = setTimeout(() => settle(new Error("Voice playback paused.")), Math.max(15000, Math.min(60000, text.length * 150)));
+            options.onStart?.();
+          };
+          audio.onended = () => { if (playing) settle(); };
+          audio.onerror = () => settle(new Error("Custom audio could not play."));
           await audio.play();
         } catch (error) {
           if (!done)

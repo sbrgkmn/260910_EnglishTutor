@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   History,
-  MessageCircle,
+  Star,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -13,6 +13,8 @@ import { TopicIcon } from "@/components/icons";
 import { Modal } from "@/components/modal";
 import { useTopicTool } from "@/components/use-topic-tool";
 import { TutorVoice } from "@/lib/voice";
+import { spriteManifest } from "@/lib/teacher/spriteManifest";
+import { Game } from "@/components/game/Game";
 import { Conversation } from "@/components/conversation";
 import { ReportView, formatTime } from "@/components/report-view";
 import type { Level, SavedSession, Student, Turn } from "@/lib/types";
@@ -25,6 +27,7 @@ import {
 } from "@/lib/storage";
 import { localReport, parseReport } from "@/lib/tutor/report";
 export default function Home() {
+  const [dev, setDev] = useState(false);
   const [initialTextMode, setInitialTextMode] = useState(false);
   const [voice] = useState(() => new TutorVoice());
   const [selected, setSelected] = useState("animals");
@@ -49,6 +52,7 @@ export default function Home() {
   const topic = getTopic(selected)!;
   useTopicTool(setSelected, view === "home");
   useEffect(() => {
+    setDev(new URLSearchParams(window.location.search).get("dev") === "true");
     setInitialTextMode(
       new URLSearchParams(window.location.search).get("mode") === "text",
     );
@@ -183,12 +187,9 @@ export default function Home() {
             setView("home");
             setNotice("");
           }}
-          aria-label="Little Talk home"
+          aria-label="Starkids home"
         >
-          <span className="brand-icon">
-            <MessageCircle size={25} />
-          </span>
-          little<span>talk</span>
+          <img className="brand-logo" src="/starkids-logo-v1.png" alt="Starkids" width={180} height={60} />
         </a>
         {view !== "conversation" && (
           <button
@@ -209,7 +210,7 @@ export default function Home() {
         <main className="start-screen">
           <figure className="start-portrait">
             <img
-              src="/teacher.jpg"
+              src={spriteManifest.poses.neutral[0].src}
               alt="The teacher whose lessons inspire your AI English tutor"
             />
             <figcaption>
@@ -224,8 +225,8 @@ export default function Home() {
             }}
           >
             <h1>
-              What shall we talk
-              <br className="desktop-break" /> about today?
+              A little adventure
+              <br className="desktop-break" /> in English.
             </h1>
             <label htmlFor="nickname">Nickname</label>
             <input
@@ -246,7 +247,7 @@ export default function Home() {
                     setStudent({ ...student, age: Number(e.target.value) })
                   }
                 >
-                  {[8, 9, 10, 11, 12, 13, 14].map((age) => (
+                  {[7, 8, 9, 10, 11, 12].map((age) => (
                     <option key={age}>{age}</option>
                   ))}
                 </select>
@@ -297,13 +298,18 @@ export default function Home() {
         </main>
       )}
       {view === "conversation" && (
-        <Conversation
+        <Game
+          key={`${selected}-${student.level}`}
+          topicId={selected}
+          student={student}
           voice={voice}
           initialTextMode={initialTextMode}
-          student={student}
-          topic={topic}
-          demo={demo}
-          onEnd={finish}
+          dev={dev}
+          onWorkshopChange={(topicId, level) => {
+            setSelected(topicId);
+            setStudent({ ...student, level });
+          }}
+          onExit={() => setView("home")}
         />
       )}
       {view === "report" && current && (
@@ -377,7 +383,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="empty-state">
-              <MessageCircle size={35} />
+              <Star size={35} />
               <h2>Your first conversation is waiting.</h2>
               <p>Pick a topic and give it a try. Your recap will be here.</p>
               <button className="primary" onClick={() => setView("home")}>
@@ -396,9 +402,9 @@ export default function Home() {
             <ShieldCheck size={30} />
           </div>
           <p>
-            Little Talk is an experimental AI English practice tutor for ages
-            8–14, inspired by a real teacher’s lessons. It is not the teacher
-            and can make mistakes.
+            Starkids is an experimental AI English practice tutor for ages 7–12,
+            inspired by a real teacher’s lessons. It is not the teacher and can
+            make mistakes.
           </p>
           <ul className="privacy-list">
             <li>

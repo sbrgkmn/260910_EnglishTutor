@@ -16,6 +16,8 @@ import { validateTutorReply } from "@/lib/tutor/validation";
 import { formatTime } from "./report-view";
 import type { VoiceProvider } from "@/lib/voice/types";
 import { speechSentences } from "@/lib/voice";
+import { TeacherSprite } from "./teacher/TeacherSprite";
+import { teacherStateFor } from "@/lib/teacher/teacherState";
 import { Modal } from "./modal";
 import { handsFreeSupported, listenHandsFree } from "@/lib/speech/hands-free";
 export function Conversation({
@@ -337,12 +339,17 @@ export function Conversation({
         <span>{student.level}</span>
         {demo && <span className="demo-label">Demo · sample replies</span>}
       </div>
-      <div
-        className={`talk-portrait ${state === "SPEAKING" ? "is-speaking" : ""}`}
-      >
-        <img
-          src="/teacher.jpg"
-          alt="Your AI tutor, inspired by your teacher’s lessons"
+      <div className="talk-portrait">
+        <TeacherSprite
+          state={
+            state === "SPEAKING" &&
+            latest?.corrections?.some((c) =>
+              currentSentence.includes(c.corrected),
+            )
+              ? "correction"
+              : teacherStateFor(state)
+          }
+          talking={state === "SPEAKING"}
         />
       </div>
       <div className="spoken-sentence" aria-live="polite">

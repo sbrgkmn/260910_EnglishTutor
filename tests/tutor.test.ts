@@ -16,7 +16,7 @@ test("validates consent, age, nickname, topic and conversation boundaries", () =
   assert.equal(validateRequest(base).topic.id, "animals");
   for (const invalid of [
     { ...base, guardianAcknowledged: false },
-    { ...base, student: { ...student, age: 7 } },
+    { ...base, student: { ...student, age: 6 } },
     { ...base, student: { ...student, name: "Full Name" } },
     { ...base, student: { ...student, level: "C2" } },
     { ...base, topicId: "unknown" },

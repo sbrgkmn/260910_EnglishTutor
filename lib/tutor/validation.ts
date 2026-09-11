@@ -32,12 +32,12 @@ export function validateRequest(value: unknown, report = false) {
     typeof s.name !== "string" ||
     !/^[\p{L}\p{M}'’-]{1,24}$/u.test(s.name) ||
     !Number.isInteger(s.age) ||
-    Number(s.age) < 8 ||
-    Number(s.age) > 14 ||
+    Number(s.age) < 7 ||
+    Number(s.age) > 12 ||
     !["A1", "A2", "B1"].includes(String(s.level))
   )
     throw new InputError(
-      "Choose a nickname, an age from 8–14, and a valid English level.",
+      "Choose a nickname, an age from 7–12, and a valid English level.",
     );
   const topic =
     typeof value.topicId === "string" ? getTopic(value.topicId) : undefined;

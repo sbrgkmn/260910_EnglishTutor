@@ -3,6 +3,7 @@ import { ElevenLabsVoiceProvider } from "./elevenlabs";
 import type { VoiceOptions, VoiceProvider, VoiceProviderName } from "./types";
 export function speechSentences(text: string): string[] {
   // Preserve quoted corrections and sentence punctuation; never paraphrase a reply.
+  if (typeof Intl.Segmenter !== "function") return text.trim() ? [text.trim()] : [];
   const segmenter = new Intl.Segmenter("en", { granularity: "sentence" });
   return [...segmenter.segment(text)]
     .map((item) => item.segment.trim())
@@ -58,9 +59,10 @@ export class TutorVoice implements VoiceProvider {
       if (this.selection === "elevenlabs") {
         try {
           await this.elevenlabs.textToSpeech(sentence, callbacks);
-        } catch {
+        } catch (error) {
           if (generation !== this.generation) return;
-          this.selection = "browser";
+          // A mobile autoplay block needs a fresh tap, not a different provider.
+          if (error instanceof Error && error.name === "NotAllowedError") throw error;
           options.onFallback?.();
           await this.browser.textToSpeech(sentence, callbacks);
         }

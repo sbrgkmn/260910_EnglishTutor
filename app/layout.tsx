@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: "Little Talk · English practice",
+  title: "Starkids",
   description:
-    "A little conversation. A little more confidence. Friendly AI English practice for young learners.",
+    "Play, speak and explore English with illustrated six-step adventures for children.",
   robots: { index: false, follow: false },
 };
 export default function RootLayout({

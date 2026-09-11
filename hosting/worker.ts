@@ -1,3 +1,5 @@
+import { handleActivity } from "../lib/activities/handleActivity";
+import { handleAnswer } from "../lib/activities/handleAnswer";
 import { handleTts, voiceSettings } from "../lib/voice/server";
 import { handleTutor } from "../lib/tutor/handleTutor";
 import { handleReport } from "../lib/tutor/handleReport";
@@ -5,6 +7,9 @@ type Env = {
   ASSETS: { fetch(request: Request): Promise<Response> };
   OPENAI_API_KEY?: string;
   OPENAI_MODEL?: string;
+  IMAGE_PROVIDER?: string;
+  IMAGE_API_KEY?: string;
+  IMAGE_MODEL?: string;
   VOICE_PROVIDER?: string;
   ELEVENLABS_API_KEY?: string;
   ELEVENLABS_VOICE_ID?: string;
@@ -14,7 +19,21 @@ export default {
     const url = new URL(request.url);
     const config = { apiKey: env.OPENAI_API_KEY, model: env.OPENAI_MODEL };
     let response: Response;
-    if (url.pathname === "/api/tts") {
+    if (
+      url.pathname === "/api/activity" ||
+      url.pathname === "/api/activity/answer"
+    ) {
+      response =
+        request.method !== "POST"
+          ? Response.json({ error: "Method not allowed." }, { status: 405 })
+          : url.pathname === "/api/activity"
+            ? await handleActivity(request, {
+                provider: env.IMAGE_PROVIDER,
+                apiKey: env.IMAGE_API_KEY,
+                model: env.IMAGE_MODEL,
+              })
+            : await handleAnswer(request, config);
+    } else if (url.pathname === "/api/tts") {
       const voice = {
         provider: env.VOICE_PROVIDER,
         apiKey: env.ELEVENLABS_API_KEY,

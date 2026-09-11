@@ -1,0 +1,81 @@
+{
+  "image": {
+    "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-72679f6c-c335-42c1-80bd-4980d4dba3ae.png",
+    "dimensions": [
+      2172,
+      724
+    ],
+    "bit_depth": 8,
+    "color_type": 2,
+    "has_alpha_band": false,
+    "has_transparency_chunk": false,
+    "visual_check": "No checkerboard visible; exact Starkids text and same foreground design retained.",
+    "background_samples_rgb": {
+      "(0, 0)": [
+        253,
+        253,
+        255
+      ],
+      "(2171, 0)": [
+        254,
+        255,
+        255
+      ],
+      "(1086, 20)": [
+        254,
+        254,
+        254
+      ],
+      "(1086, 100)": [
+        255,
+        255,
+        255
+      ],
+      "(1086, 704)": [
+        254,
+        254,
+        254
+      ],
+      "(0, 723)": [
+        253,
+        253,
+        253
+      ],
+      "(2171, 723)": [
+        253,
+        253,
+        253
+      ]
+    },
+    "top_twenty_rows_rgb_min": [
+      253,
+      253,
+      253
+    ],
+    "top_twenty_rows_rgb_max": [
+      255,
+      255,
+      255
+    ]
+  },
+  "prompt": "Use case: precise-object-edit.\nInput image: the provided horizontal Starkids logo is the edit target.\nChange only the background. Replace EVERY gray checkerboard square and ALL background artifacts with one perfectly uniform opaque solid white background, RGB #FFFFFF. There must be NO visible checkerboard anywhere, including inside the gaps between letters, inside letter counters, around the rainbow or stars, and around all edges. White should extend continuously to all four image edges.\nKeep the existing foreground logo artwork exactly unchanged: precise text \"Starkids\", one horizontal word with capital S and lowercase tarkids, all eight letters preserved; multicolored pink/teal/green/lavender rounded lettering; smiling pink star; rainbow; accent stars; heart inside the a; white outlines. Preserve all foreground colors, artwork positions, proportions and crisp edges.\nMaintain the compact approximately 3:1 horizontal composition and full visible logo within the canvas. Do not add or remove text, symbols, details or decorations. Do not redraw, redesign, relight or rearrange the logo. No transparency, shadowed paper, mockup, checker pattern, watermark, border, texture, gradient or gray background. The ONLY change is replacing the entire checkerboard backdrop with pure flat #FFFFFF white.",
+  "initial_generation": {
+    "image": {
+      "path": "/Users/sabrigokmen/.codex/generated_images/01a08e12-8625-7aa1-acb4-07e956e7aad0/exec-629f0e58-23e3-49cb-8706-9fbc8951d98b.png",
+      "dimensions": [
+        2172,
+        724
+      ],
+      "bit_depth": 8,
+      "color_type": 2,
+      "has_alpha_band": false,
+      "has_transparency_chunk": false
+    },
+    "prompt": "Use case: precise-object-edit.\nAsset type: a polished transparent PNG logo for the header of a friendly children's English school.\nInput image: the provided Starkids logo is the edit target and identity reference.\nPrimary request: refine this existing logo into one polished, compact horizontal web logo. Preserve the recognizable playful pastel rainbow, smiling pink star, and multicolored Starkids identity from the reference while improving readability, typography, outlines, alignment and spacing.\nText (verbatim): \"Starkids\"\nTypography: exactly one word, capital S and lowercase tarkids, on one clean horizontal baseline. All seven letters must be distinct and immediately readable. Smooth rounded custom lettering with professional spacing. Preserve a balanced pink, teal, green and lavender palette inspired by the reference. The lettering is the dominant element.\nComposition/framing: horizontal approximately 3:1 canvas, ideally 1536x512 pixels. A friendly compact rainbow and smiling pink-star emblem sits beside or lightly above the first letters, without obscuring any lettering. Include at most one or two tiny star accents. Avoid the original stacked two-line word treatment. Full logo remains inside generous transparent padding, with about 8% clear margin on every outer edge.\nFinish: cleaner crisp outlines, simple shapes, restrained small details, mature professional polish appropriate to a friendly children's English school. Strong legibility when displayed at roughly 160x60 pixels. Flat clean logo art, no realistic textures.\nBackground: genuinely transparent background with alpha transparency, including around and inside the logo; NOT a white background and NOT a checkerboard drawing.\nConstraints: preserve the original brand identity and cheerful expression. No tagline, other words, mockup, border, watermark, paper sheet, background scene, drop shadow, excessive decorations or fussy tiny details. Deliver only the finished transparent logo."
+  },
+  "web_asset": "public/starkids-logo-v1.png",
+  "web_size": [
+    720,
+    240
+  ]
+}

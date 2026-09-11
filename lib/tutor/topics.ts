@@ -11,7 +11,7 @@ export type Topic = {
   icon: string;
   color: string;
 };
-export const topics: Topic[] = [
+const allTopics: Topic[] = [
   {
     id: "animals",
     title: "Animals",
@@ -146,4 +146,7 @@ export const topics: Topic[] = [
     color: "peach",
   },
 ];
-export const getTopic = (id: string) => topics.find((topic) => topic.id === id);
+// Keep legacy metadata available for previously saved practice sessions.
+export const getTopic = (id: string) => allTopics.find((topic) => topic.id === id);
+export const topics: Topic[] = ["animals", "food", "home", "hobbies", "school", "my-town"].map((id) => getTopic(id)!);
+export const getPracticeTopic = (id: string) => topics.find((topic) => topic.id === id);
