@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
+  ArrowLeft,
+  MessageCircle,
   Keyboard,
   Mic,
   Pause,
@@ -65,169 +67,102 @@ export function Game({
     : q.type === "find" ? "Tap the picture or speak." : "";
   return (
     <main className="game-main">
-      <div className="game-topline">
-        <span className="game-eyebrow">{getTopic(topicId)?.title}</span>
-        <div className="game-top-actions">
-          <ScoreDisplay score={c.game.stars} />
-          <button className="quiet game-end" onClick={c.exit}>
-            End
-          </button>
+      <div className="lesson-card">
+        <div className="game-topline">
+          <div className="lesson-location">
+            <button className="quiet game-end" onClick={c.exit} aria-label="Back to topics">
+              <ArrowLeft size={18} /> Topics
+            </button>
+            <span className="game-eyebrow">{getTopic(topicId)?.title}</span>
+          </div>
+          <div className="game-top-actions">
+            <ProgressDisplay current={c.game.answered.length} total={c.game.activity.questions.length} />
+            <ScoreDisplay score={c.game.stars} />
+          </div>
         </div>
-      </div>
-      {c.game.completed ? (
-        <section className="game-celebration">
-          <div className="celebration-stars" aria-hidden="true">
-            ✦ <Star fill="currentColor" size={64} /> ✦
-          </div>
-          <TeacherAvatar
-            state={c.state === "LISTENING" ? "READY" : c.state}
-            complete
-            override={pose}
-          />
-          <h1>Lovely work, {student.name}!</h1>
-          <p>
-            You earned <strong>{c.game.earned} stars</strong>!
-          </p>
-          <div className="celebration-actions">
-            <button className="primary" disabled={busy} onClick={c.next}>
-              Another round <ArrowRight size={20} />
-            </button>
-            <button className="quiet" onClick={c.exit}>
-              Finish
-            </button>
-          </div>
-        </section>
-      ) : (
-        <>
-          <ActivityScene
-            scene={c.game.activity.scene}
-            question={q}
-            disabled={busy}
-            onSelect={(objectId) => c.submit({ type: "click", objectId })}
-            selected={c.selected}
-            success={c.feedback?.success}
-            hidden={c.memoryHidden}
-            debug={hitboxes}
-          />
-          <section
-            className="game-conversation"
-            aria-label="Your teacher’s question"
-          >
-            <TeacherAvatar
-              state={c.state}
-              result={c.feedback}
-              override={pose}
-            />
-            <div className="game-question">
-              <h1 aria-live="polite">{c.sentence}</h1>
-              {status && <span className="game-state" role="status">
-                <i className={c.state.toLowerCase()} />
-                {status}
-              </span>}
-              {c.micStatus === "listening" && (
-                <meter className="mic-level" aria-label="Microphone input level" min={0} max={1} value={c.micLevel} />
+        {c.game.completed ? (
+          <section className="game-celebration">
+            <div className="celebration-stars" aria-hidden="true">
+              ✦ <Star fill="currentColor" size={40} /> ✦
+            </div>
+            <TeacherAvatar state={c.state === "LISTENING" ? "READY" : c.state} complete override={pose} />
+            <h1>Lovely work, {student.name}!</h1>
+            <p>You earned <strong>{c.game.earned} stars</strong>!</p>
+            <div className="celebration-actions">
+              <button className="primary" disabled={busy} onClick={c.next}>
+                Another round <ArrowRight size={20} />
+              </button>
+              <button className="quiet" onClick={c.exit}>Finish</button>
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="lesson-stage">
+              <div className="lesson-picture">
+                <ActivityScene
+                  scene={c.game.activity.scene}
+                  question={q}
+                  disabled={busy}
+                  onSelect={(objectId) => c.submit({ type: "click", objectId })}
+                  selected={c.selected}
+                  success={c.feedback?.success}
+                  hidden={c.memoryHidden}
+                  debug={hitboxes}
+                />
+                {q.type === "choose" && (
+                  <div className="picture-choices" aria-label="Choose a picture">
+                    {q.choices?.map((id) => (
+                      <button key={id} disabled={busy} onClick={() => c.submit({ type: "click", objectId: id })}>
+                        <ObjectPicture scene={c.game.activity.scene} object={c.game.activity.scene.objects.find((o) => o.id === id)!} />
+                        <span>{c.game.activity.scene.objects.find((o) => o.id === id)?.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <section className="game-conversation" aria-label="Your teacher’s question">
+                <TeacherAvatar state={c.state} result={c.feedback} override={pose} />
+                <div className="game-question">
+                  <h1 aria-live="polite">{c.sentence}</h1>
+                  {status && <span className="game-state" role="status"><i className={c.state.toLowerCase()} />{status}</span>}
+                  {c.micStatus === "listening" && (
+                    <meter className="mic-level" aria-label="Microphone input level" min={0} max={1} value={c.micLevel} />
+                  )}
+                </div>
+              </section>
+            </div>
+            <div className={`lesson-response ${c.textMode ? "is-text" : ""}`} aria-label="Answer the teacher">
+              <button
+                className={`game-mic ${c.auto ? "mic-on" : ""}`}
+                disabled={busy}
+                onClick={c.toggleMic}
+                aria-label={c.auto ? "Pause microphone" : "Speak your answer"}
+              >
+                {c.auto ? <Pause size={22} /> : <Mic size={22} />}
+                <span>{c.auto ? "Pause" : "Speak"}</span>
+              </button>
+              {c.textMode ? (
+                <form className="game-text-form" onSubmit={(e) => { e.preventDefault(); c.submit({ type: "text", text: c.draft }); }}>
+                  <input aria-label="Your answer" placeholder="Type your answer…" value={c.draft} maxLength={1000} disabled={busy} onChange={(e) => c.setDraft(e.target.value)} />
+                  <button className="primary" aria-label="Send answer" disabled={busy || !c.draft.trim()}><ArrowRight size={22} /></button>
+                </form>
+              ) : (
+                <>
+                  {c.draft && <p className="live-answer" aria-live="polite">{c.draft}</p>}
+                  <button className="quiet type-answer" onClick={c.toggleText}><Keyboard size={18} /> Type instead</button>
+                </>
               )}
             </div>
-            <button
-              className={`game-mic ${c.auto ? "mic-on" : ""}`}
-              disabled={busy}
-              onClick={c.toggleMic}
-              aria-label={c.auto ? "Pause microphone" : "Speak your answer"}
-            >
-              {c.auto ? <Pause size={25} /> : <Mic size={27} />}
-              <span>{c.auto ? "Pause" : "Speak"}</span>
-            </button>
-          </section>
-          {q.type === "choose" && (
-            <div className="picture-choices" aria-label="Choose a picture">
-              {q.choices?.map((id) => (
-                <button
-                  key={id}
-                  disabled={busy}
-                  onClick={() => c.submit({ type: "click", objectId: id })}
-                >
-                  <ObjectPicture
-                    scene={c.game.activity.scene}
-                    object={
-                      c.game.activity.scene.objects.find((o) => o.id === id)!
-                    }
-                  />
-                  <span>
-                    {
-                      c.game.activity.scene.objects.find((o) => o.id === id)
-                        ?.label
-                    }
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-          {c.textMode && (
-            <form
-              className="game-text-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                c.submit({ type: "text", text: c.draft });
-              }}
-            >
-              <input
-                aria-label="Your answer"
-                placeholder="Type your answer…"
-                value={c.draft}
-                maxLength={1000}
-                disabled={busy}
-                onChange={(e) => c.setDraft(e.target.value)}
-              />
-              <button
-                className="primary"
-                aria-label="Send answer"
-                disabled={busy || !c.draft.trim()}
-              >
-                <ArrowRight size={23} />
-              </button>
-            </form>
-          )}
-          {!c.textMode && c.draft && (
-            <p className="live-answer" aria-live="polite">
-              {c.draft}
-            </p>
-          )}
-          <div className="game-bottom">
-            <ProgressDisplay
-              current={c.game.answered.length}
-              total={c.game.activity.questions.length}
-            />
-          </div>
-        </>
-      )}
-      {c.notice && (
-        <p className="game-notice" role="status">
-          {c.notice}
-        </p>
-      )}
-      <div className="game-utilities">
-        <button className="quiet" onClick={c.toggleText}>
-          <Keyboard size={16} />
-          {c.textMode ? "Voice mode" : "Type instead"}
-        </button>
-        <button
-          className="quiet"
-          onClick={() => void c.replay()}
-          disabled={busy}
-        >
-          <RotateCcw size={16} />
-          Hear again
-        </button>
-        <button
-          className="quiet"
-          onClick={c.toggleSound}
-          aria-label={c.sound ? "Mute tutor" : "Unmute tutor"}
-        >
-          {c.sound ? <Volume2 size={18} /> : <VolumeX size={18} />}
-        </button>
-        <button className="quiet" onClick={() => setTranscript(true)}>
-          Transcript
-        </button>
+          </>
+        )}
+        {c.notice && <p className="game-notice" role="status">{c.notice}</p>}
+        <nav className="game-utilities" aria-label="Lesson controls">
+          <button className="quiet" onClick={() => void c.replay()} disabled={busy}><RotateCcw size={17} /> Hear again</button>
+          <button className="quiet" onClick={c.toggleSound} aria-label={c.sound ? "Mute tutor" : "Unmute tutor"}>
+            {c.sound ? <Volume2 size={18} /> : <VolumeX size={18} />} {c.sound ? "Mute" : "Unmute"}
+          </button>
+          <button className="quiet" onClick={() => setTranscript(true)}><MessageCircle size={17} /> Transcript</button>
+        </nav>
       </div>
       {transcript && (
         <Modal title="Our conversation" onClose={() => setTranscript(false)}>

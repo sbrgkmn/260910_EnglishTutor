@@ -179,10 +179,7 @@ export default function Home() {
           className="brand"
           href="/"
           onClick={(e) => {
-            if (view === "conversation") {
-              e.preventDefault();
-              return;
-            }
+            if (view === "conversation") voice.cancel();
             e.preventDefault();
             setView("home");
             setNotice("");

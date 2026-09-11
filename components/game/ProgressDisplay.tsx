@@ -10,12 +10,15 @@ export function ProgressDisplay({
       className="game-progress"
       aria-label={`${current} of ${total} questions complete`}
     >
-      {Array.from({ length: total }, (_, i) => (
-        <span
-          key={i}
-          className={i < current ? "done" : i === current ? "current" : ""}
-        />
-      ))}
+      <small className="progress-count" aria-hidden="true">{current}/{total}</small>
+      <div className="progress-track" aria-hidden="true">
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            key={i}
+            className={i < current ? "done" : i === current ? "current" : ""}
+          />
+        ))}
+      </div>
     </div>
   );
 }

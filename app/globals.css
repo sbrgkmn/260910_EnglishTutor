@@ -2022,17 +2022,41 @@ textarea::placeholder {
   margin-inline: auto;
 }
 
-/* Picture practice: a scene first, with the teacher beside the question. */
-.picture-game-label {display:inline-flex;color:#557668;font-size:12px;letter-spacing:.03em;margin:0 0 14px;}
-.game-main {max-width:1040px;margin:0 auto;padding:4px 28px 28px;}
-.game-topline {display:flex;align-items:center;justify-content:space-between;margin:0 0 16px;gap:16px;}
-.game-eyebrow {font-size:12px;letter-spacing:.16em;color:#526853;font-weight:700;}
-.game-eyebrow span {font-weight:400;letter-spacing:.04em;color:#798476;}
-.game-top-actions {display:flex;gap:20px;align-items:center;}
-.game-score {display:flex;align-items:center;gap:9px;color:#a6762f;background:#f8ecd1;padding:9px 16px;border-radius:30px;min-width:88px;justify-content:center;}
-.game-score strong {font-size:22px;animation:star-in .35s ease-out;}
-.game-end {min-width:48px;min-height:44px;font-size:14px;}
-.activity-scene {position:relative;aspect-ratio:1000/640;border-radius:24px;overflow:hidden;isolation:isolate;background:#d0dfb0;box-shadow:0 8px 28px #44694709;}
+/* A contained lesson workspace keeps the picture, teacher and actions together. */
+.app-shell {font-family:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+.app-shell h1,.app-shell h2 {font-family:inherit;letter-spacing:-.025em;}
+.header {max-width:1080px;height:76px;padding:0 24px;}
+.brand .brand-logo {display:block;width:162px;height:54px;object-fit:contain;mix-blend-mode:multiply;}
+.header .quiet {font-size:14px;}
+.start-screen {max-width:940px;grid-template-columns:280px minmax(0,440px);justify-content:center;gap:44px;margin:24px auto 40px;padding:0 24px;}
+.start-portrait img {width:264px;height:330px;object-fit:contain;object-position:center;border-radius:24px;filter:none;}
+.start-portrait figcaption {max-width:264px;margin:14px auto 0;font-size:13px;}
+.start-form h1 {font-size:32px;font-weight:700;line-height:1.2;margin-bottom:22px;}
+.start-form input,.start-form select {border-radius:12px;}
+.start-form>label,.profile-fields label,.topic-picker legend {font-size:14px;font-weight:600;}
+.start-form>input {margin-bottom:14px;}
+.topic-picker {margin-top:18px;}
+.compact-topic {font-size:14px;min-height:46px;border-radius:12px;gap:7px;}
+.start-talking {margin-top:18px;min-height:48px;border-radius:12px;}
+
+.game-main {max-width:1080px;margin:0 auto;padding:0 24px 28px;}
+.lesson-card {background:#fffefa;border:1px solid #e0e6dc;border-radius:24px;overflow:hidden;box-shadow:0 8px 32px #223c3805;}
+.game-topline {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 22px;border-bottom:1px solid var(--line);}
+.lesson-location,.game-top-actions {display:flex;align-items:center;gap:18px;min-width:0;}
+.game-eyebrow {font-size:16px;font-weight:700;letter-spacing:0;color:var(--ink);}
+.game-end {font-size:14px;min-height:44px;padding:8px 10px 8px 0;color:#596e61;}
+.game-score {display:flex;align-items:center;gap:6px;color:#936421;background:#fcf0d5;padding:7px 12px;border-radius:30px;justify-content:center;}
+.game-score strong {font-size:18px;line-height:1.3;font-variant-numeric:tabular-nums;animation:star-in .35s ease-out;}
+.game-score svg {width:18px;height:18px;}
+.game-progress,.progress-track {display:flex;gap:5px;align-items:center;}
+.progress-count {display:none;font-size:13px;line-height:1;font-variant-numeric:tabular-nums;color:#627364;white-space:nowrap;}
+.progress-track>span {width:15px;height:5px;border-radius:3px;background:#e3e8dd;}
+.progress-track>span.done {background:#63846c;}
+.progress-track>span.current {background:#b9c8a9;}
+.lesson-stage {display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:26px;align-items:center;padding:24px;}
+.lesson-picture {min-width:0;}
+.activity-scene {position:relative;width:100%;aspect-ratio:1000/640;border-radius:18px;overflow:hidden;isolation:isolate;background:#d0dfb0;}
+.activity-scene.scene-illustration {aspect-ratio:3/2;background:#faf5e9;}
 .scene-backdrop {position:absolute;width:100%;height:100%;inset:0;object-fit:cover;}
 .scene-object {position:absolute;}
 .scene-object>img {width:100%;height:100%;object-fit:fill;user-select:none;pointer-events:none;}
@@ -2044,120 +2068,135 @@ textarea::placeholder {
 .tap-star {position:absolute;right:-2px;top:-20px;color:#fff4ac;font-size:48px;filter:drop-shadow(0 2px 2px #897145);animation:star-in .45s ease-out;}
 .hitbox-label {position:absolute;top:0;left:0;font-size:12px;background:#153f37;color:white;padding:1px 5px;pointer-events:none;}
 .show-hitboxes .scene-object {outline:2px dashed #234c43;}
-.game-conversation {display:grid;grid-template-columns:92px 1fr 82px;align-items:center;gap:20px;padding:23px 0 14px;}
-.teacher-sprite {position:relative;width:88px;height:100px;border-radius:45px 45px 34px 34px;background:#dfe8d5;isolation:isolate;box-shadow:0 0 0 5px #e7ebdf;transition:transform .45s ease,box-shadow .45s ease;}
-.teacher-sprite img {position:absolute;width:100%;height:100%;inset:0;object-fit:cover;object-position:50% 25%;border-radius:inherit;}
+.game-conversation {display:flex;flex-direction:column;align-items:center;gap:20px;min-width:0;}
+.teacher-sprite {position:relative;width:240px;height:300px;border-radius:20px;background:#fff9e9;isolation:isolate;box-shadow:0 0 0 4px #e7ebdf;transition:transform .45s ease,box-shadow .45s ease;flex-shrink:0;}
+.teacher-sprite-frames {position:relative;width:100%;height:100%;overflow:hidden;border-radius:inherit;}
+.teacher-sprite img {position:absolute;width:100%;height:100%;inset:0;object-fit:contain;object-position:center;filter:none;border-radius:0;}
 .teacher-sprite .pose-front {animation:pose-fade .4s ease both;}
-.teacher-sprite.is-talking {box-shadow:0 0 0 6px #d0dfc7;animation:teacher-breathe 2.5s ease-in-out infinite;}
-.teacher-sprite.pose-listening {transform:rotate(-2deg);box-shadow:0 0 0 6px #d7e8e8;}
-.teacher-sprite.pose-happy,.teacher-sprite.pose-celebrating {box-shadow:0 0 0 6px #f2dfac;}
-.teacher-sprite.pose-correction,.teacher-sprite.pose-encouraging {box-shadow:0 0 0 6px #e6dfed;}
+.teacher-sprite.is-talking {box-shadow:0 0 0 5px #d0dfc7;animation:teacher-breathe 2.5s ease-in-out infinite;}
+.teacher-sprite.pose-listening {transform:rotate(-2deg);box-shadow:0 0 0 5px #d7e8e8;}
+.teacher-sprite.pose-happy,.teacher-sprite.pose-celebrating {box-shadow:0 0 0 5px #f2dfac;}
+.teacher-sprite.pose-correction,.teacher-sprite.pose-encouraging {box-shadow:0 0 0 5px #e6dfed;}
 .teacher-mood {position:absolute;right:-7px;bottom:-6px;font-size:22px;color:#b48941;background:#fffaf0;border-radius:50%;min-width:28px;text-align:center;}
 .teacher-mood:empty {display:none;}
-.teacher-name {font-size:10px;font-weight:650;letter-spacing:.12em;color:#7a8275;}
-.game-question h1 {font-size:clamp(22px,2.6vw,31px);font-weight:550;letter-spacing:-.035em;line-height:1.25;margin:7px 0 9px;color:#2e4239;}
-.game-state {display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#6f7d70;}
-.game-state i {display:block;width:6px;height:6px;border-radius:50%;background:#93ad91;}
+.talk-portrait .teacher-sprite {width:100%;height:100%;border-radius:inherit;}
+.game-question {width:100%;text-align:center;}
+.game-question h1 {font-size:24px;font-weight:650;letter-spacing:-.025em;line-height:1.3;margin:0;color:#293f35;overflow-wrap:break-word;}
+.game-state {display:inline-flex;align-items:center;gap:7px;font-size:13px;color:#627364;margin-top:10px;line-height:1.4;}
+.game-state i {display:block;flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#93ad91;}
 .game-state i.speaking,.game-state i.listening {background:#3e8179;box-shadow:0 0 0 4px #7ba59b22;}
-.mic-level {display:block;width:92px;height:10px;margin-top:8px;accent-color:#3e8179;}
+.mic-level {display:block;width:92px;height:10px;margin:8px auto 0;accent-color:#3e8179;}
 .mic-level::-webkit-meter-bar {background:#e7ebdf;border:0;border-radius:8px;}
 .mic-level::-webkit-meter-optimum-value {background:#3e8179;border-radius:8px;}
+.lesson-response {display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;padding:16px 24px;background:#f4f6ef;border-top:1px solid var(--line);}
+.game-mic {display:inline-flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;min-height:48px;min-width:120px;padding:12px 18px;border:0;border-radius:14px;background:#284d42;color:#fffdf4;box-shadow:0 2px 0 #1e3b33;}
+.game-mic span {font-size:16px;font-weight:600;}
+.game-mic:hover:not(:disabled) {background:#1f4036;}
+.game-mic.mic-on {background:#477772;}
+.type-answer {font-size:14px;min-height:48px;}
+.is-text .game-mic {background:white;border:1px solid #d7dfd1;color:#284d42;box-shadow:none;}
+.game-text-form {display:flex;flex:1;gap:8px;margin:0;max-width:600px;min-width:0;}
+.game-text-form input {flex:1;min-width:0;min-height:48px;padding:11px 14px;border:1px solid #d7dfd1;border-radius:12px;font-size:16px;background:white;}
+.game-text-form button {width:48px;min-height:48px;padding:0;justify-content:center;border-radius:12px;}
+.live-answer {flex-basis:100%;order:3;max-width:600px;text-align:center;font-size:16px;line-height:1.5;color:#45604e;overflow-wrap:anywhere;}
+.game-utilities {display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:6px 16px;}
+.game-utilities .quiet {font-size:14px;min-height:44px;padding:8px 12px;color:#5b7062;}
+.game-notice {font-size:14px;line-height:1.5;color:#695e41;text-align:center;margin:0;padding:12px 24px;background:#fff7e7;}
+.picture-choices {display:flex;justify-content:center;gap:10px;margin-top:12px;}
+.picture-choices button {display:flex;flex-direction:column;align-items:center;gap:5px;background:#fffdf4;border:1px solid #dce2d2;border-radius:14px;width:96px;min-height:92px;padding:7px;color:#466051;font-size:14px;line-height:1.3;}
+.picture-choices button:hover {border-color:#658675;background:#f0f4e6;}
+.picture-choices img {height:58px;width:64px;object-fit:contain;}
+.object-picture {display:block;width:58px;height:58px;background-repeat:no-repeat;border-radius:10px;}
+.memory-cover {position:absolute;inset:0;background:#ccdaba;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;color:#46614e;text-align:center;}
+.memory-cover span {font-size:48px;color:#7a9872;}
+.memory-cover strong {font-size:20px;font-weight:600;}
+.game-celebration {text-align:center;display:flex;align-items:center;flex-direction:column;padding:24px;}
+.celebration-stars {color:#c7a04a;display:flex;align-items:center;gap:24px;margin-bottom:18px;font-size:24px;}
+.game-celebration h1 {font-size:32px;font-weight:700;line-height:1.2;margin:24px 0 8px;}
+.game-celebration p {font-size:18px;color:#66725f;}
+.celebration-actions {display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px;}
+.celebration-actions button {min-height:48px;border-radius:12px;}
+.game-dev {margin-top:20px;background:#f2efe6;border:1px solid #d8ded0;border-radius:14px;padding:16px;font-size:13px;}
+.game-dev summary {cursor:pointer;font-weight:650;min-height:44px;}
+.dev-actions {display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.game-dev button {background:white;border:1px solid #bcc8b7;border-radius:7px;min-height:44px;padding:8px 12px;}
+.game-dev button[aria-pressed=true] {background:#d7e5cd;}
+.game-dev pre {overflow:auto;max-height:380px;background:#fffdf6;padding:15px;font-size:12px;}
+.dev-selectors {display:flex;flex-wrap:wrap;gap:16px;margin:12px 0;}
+.dev-selectors label {display:grid;gap:6px;font-size:14px;}
+.dev-selectors select {min-height:44px;border:1px solid #a9b8a5;border-radius:8px;padding:8px;background:#fffdf6;}
+.sprite-tester {display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:16px;}
+.sprite-tester button {display:grid;gap:7px;align-content:start;text-align:center;padding:6px;font-size:12px;}
+.sprite-tester img {width:100%;aspect-ratio:4/5;object-fit:contain;border-radius:6px;}
+.sprite-tester .follow-conversation {grid-column:1/-1;display:block;min-height:44px;}
+.sprite-tester button[aria-pressed=true] {background:#dce9d5;outline:2px solid #365f4e;}
 .mic-diagnostics {font-size:12px;overflow-wrap:anywhere;}
 .mic-diagnostics ol {padding-left:20px;max-height:220px;overflow:auto;}
-.game-mic {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#284d42;color:#fffdf4;border:0;border-radius:50%;width:80px;height:80px;cursor:pointer;box-shadow:0 4px 0 #1e3b33;transition:transform .2s;}
-.game-mic span {font-size:11px;}
-.game-mic:hover:not(:disabled) {transform:translateY(-2px);}
-.game-mic:disabled {background:#8d9f95;box-shadow:0 3px 0 #7a8e84;opacity:.65;}
-.game-mic.mic-on {background:#5a8581;}
-.game-bottom {display:flex;justify-content:center;gap:20px;align-items:center;margin:13px 0 2px;}
-.game-progress {display:flex;gap:8px;align-items:center;}
-.game-progress>span {width:9px;height:9px;border-radius:50%;background:#dde3d6;}
-.game-progress>span.done {background:#63846c;}
-.game-progress>span.current {box-shadow:0 0 0 2px #a5b39b;}
-.game-progress small {font-size:11px;margin-left:6px;color:#7b8476;}
-.game-timer {font-variant-numeric:tabular-nums;font-size:11px;color:#7b8476;}
-.game-utilities {display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:9px 0 0;}
-.game-utilities .quiet {font-size:11px;min-height:44px;padding:8px 10px;color:#65786c;}
-.game-disclosure {text-align:center;font-size:10px;color:#7e897f;margin:3px 0 0;}
-.game-notice {font-size:12px;color:#6c786c;text-align:center;margin:12px 0 0;}
-.game-text-form {display:flex;gap:10px;max-width:590px;margin:8px auto;}
-.game-text-form input {flex:1;min-width:0;padding:12px 15px;border-radius:13px;font-size:16px;background:#fffdf6;}
-.game-text-form button {width:49px;min-height:48px;padding:0;justify-content:center;border-radius:13px;}
-.picture-choices {display:flex;justify-content:center;gap:14px;margin:5px 0 15px;}
-.picture-choices button {background:#fffcf4;border:1px solid #dce2d2;border-radius:18px;width:100px;min-height:96px;padding:6px;cursor:pointer;font-size:13px;color:#466051;}
-.picture-choices button:hover {border-color:#658675;background:#f0f4e6;}
-.picture-choices img {height:63px;width:80px;object-fit:contain;margin:auto;}
-.memory-cover {position:absolute;inset:0;background:#ccdaba;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;color:#46614e;}
-.memory-cover span {font-size:55px;color:#7a9872;}.memory-cover strong {font-size:20px;font-weight:500;}
-.game-celebration {text-align:center;min-height:530px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 0;}
-.celebration-stars {color:#c7a04a;display:flex;align-items:center;gap:28px;margin-bottom:28px;font-size:24px;}
-.game-celebration .teacher-sprite {width:102px;height:116px;}
-.game-celebration h1 {font-size:clamp(30px,4vw,48px);line-height:1.13;letter-spacing:-.045em;font-weight:500;margin:25px 0 12px;}
-.game-celebration p {font-size:18px;color:#66725f;}
-.celebration-actions {display:flex;gap:20px;margin-top:25px;}
-.game-dev {margin-top:40px;background:#f2efe6;border:1px solid #d8ded0;border-radius:14px;padding:20px;font-size:13px;}
-.game-dev summary {cursor:pointer;font-weight:650;min-height:44px;}
-.dev-actions,.sprite-tester {display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
-.game-dev button {background:white;border:1px solid #bcc8b7;border-radius:7px;min-height:44px;padding:8px 12px;cursor:pointer;}
-.game-dev button[aria-pressed=true] {background:#d7e5cd;}
-.game-dev pre {overflow:auto;max-height:380px;background:#fffdf6;padding:15px;font-size:11px;}
 @keyframes pose-fade {from{opacity:0}to{opacity:1}}
 @keyframes teacher-breathe {0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
 @keyframes star-in {from{transform:scale(.75);opacity:.4}to{transform:scale(1);opacity:1}}
 @keyframes gentle-wiggle {0%,100%{transform:translateX(0)}35%{transform:translateX(-3px)}70%{transform:translateX(3px)}}
-@media(min-width:1100px){.game-main{max-width:1000px;}.activity-scene{max-height:485px;aspect-ratio:1000/640;max-width:758px;margin:auto;}.game-conversation{max-width:800px;margin:auto;}}
-@media(max-width:600px){.game-main{padding:0 16px 24px;}.game-topline{margin:0 0 12px;}.game-eyebrow{font-size:10px;letter-spacing:.10em;}.game-top-actions{gap:7px;}.game-score{padding:7px 12px;min-width:73px;}.game-score strong{font-size:19px;}.activity-scene{border-radius:19px;}.game-conversation{grid-template-columns:60px 1fr;gap:15px;padding:23px 3px 4px;align-items:start;}.teacher-sprite{width:56px;height:67px;box-shadow:0 0 0 4px #e7ebdf;}.teacher-name{font-size:8px;}.game-question h1{font-size:24px;min-height:58px;margin:5px 0 8px;}.game-mic{grid-column:1/-1;justify-self:center;width:76px;height:76px;margin:6px 0;}.game-state{font-size:12px;}.game-bottom{margin:17px 0 0;}.game-utilities{gap:1px;}.game-utilities .quiet{padding:8px;font-size:10px;}.picture-choices button{width:89px;min-height:93px;}.picture-choices{margin-top:14px;gap:12px;}.game-text-form{margin-top:14px;}.game-celebration{min-height:510px;}.game-dev{padding:12px;}.game-topline .game-end{font-size:12px;}}
-@media(prefers-reduced-motion:reduce){.teacher-sprite,.teacher-sprite.is-talking,.teacher-sprite .pose-front,.game-score strong,.tap-star,.target-retry{animation:none;transition:none;}}
 
-/* Sprites share one aligned portrait across games and conversation practice. */
-.talk-portrait .teacher-sprite {width:100%;height:100%;border-radius:inherit;}
-.teacher-sprite img {object-position:50% 35%;filter:none;}
-.dev-selectors {display:flex;gap:16px;margin:12px 0;}
-.dev-selectors label {display:grid;gap:6px;font-size:12px;}
-.dev-selectors select {min-height:44px;border:1px solid #a9b8a5;border-radius:8px;padding:8px;background:#fffdf6;}
-
-.sprite-tester {display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:16px;}
-.sprite-tester button {display:grid;gap:7px;align-content:start;text-align:center;padding:6px;font-size:11px;}
-.sprite-tester img {width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px;}
-.sprite-tester .follow-conversation {grid-column:1/-1;display:block;min-height:44px;}
-.sprite-tester button[aria-pressed="true"] {background:#dce9d5;outline:2px solid #365f4e;}
-
-.teacher-sprite-frames {position:relative;width:100%;height:100%;overflow:hidden;border-radius:inherit;}
-.teacher-sprite .teacher-sprite-frames img {width:100%;max-width:none;height:100%;inset:0;border-radius:0;object-fit:contain;object-position:center;}
-
-/* A quieter lesson screen, with expressions large enough to read. */
-.game-conversation {grid-template-columns:240px minmax(0,1fr) 82px;gap:24px;padding:24px 0 10px;}
-.game-conversation .teacher-sprite {width:240px;height:300px;border-radius:24px;}
-.game-question h1 {margin-top:0;}
-.game-bottom {margin-top:14px;justify-content:center;}
-.game-utilities {margin-top:14px;}
-.game-celebration .teacher-sprite {width:240px;height:300px;border-radius:24px;}
-.scene-illustration {aspect-ratio:3/2;background:#faf5e9;}
-.object-picture {display:block;width:72px;height:72px;background-repeat:no-repeat;border-radius:12px;}
-.picture-choices button {align-items:center;}
-.picture-choices button>span:last-child {max-width:120px;font-size:14px;line-height:1.15;}
-.game-dev {margin-top:24px;}
-@media(min-width:1100px){.activity-scene{max-height:none;width:min(100%,656px);}.activity-scene.scene-illustration{width:min(100%,630px);}}
-@media(max-width:600px){
-  .game-conversation {grid-template-columns:min(46vw,176px) minmax(0,1fr);gap:14px;padding:22px 0 4px;align-items:center;}
-  .game-conversation .teacher-sprite {width:min(46vw,176px);height:auto;aspect-ratio:4/5;border-radius:18px;}
-  .game-question h1 {font-size:clamp(21px,5.6vw,25px);min-height:0;line-height:1.16;}
-  .game-state {font-size:13px;}
-  .game-mic {margin:0;}
-  .game-bottom {margin-top:16px;}
-  .game-utilities .quiet {font-size:12px;}
-  .picture-choices {margin-top:12px;gap:10px;}
-  .picture-choices button {min-height:110px;width:100px;}
-  .object-picture {width:68px;height:68px;}
+@media(max-width:800px) {
+  .start-screen {grid-template-columns:220px minmax(0,1fr);gap:28px;}
+  .start-portrait img {width:216px;height:270px;}
+  .start-form h1 {font-size:28px;}
+  .lesson-stage {grid-template-columns:1fr;gap:22px;}
+  .lesson-picture {width:100%;max-width:580px;justify-self:center;}
+  .game-conversation {display:grid;grid-template-columns:176px minmax(0,1fr);gap:22px;max-width:580px;width:100%;justify-self:center;}
+  .game-conversation .teacher-sprite {width:176px;height:220px;}
+  .game-question {text-align:left;}
+  .mic-level {margin-left:0;}
 }
-
-.brand .brand-logo {
-  display: block;
-  width: 180px;
-  height: 60px;
-  object-fit: contain;
-  mix-blend-mode: multiply;
+@media(max-width:600px) {
+  .header,.in-conversation .header {height:56px;padding:0 16px;justify-content:space-between;}
+  .brand .brand-logo {width:140px;height:47px;}
+  .start-screen {display:flex;gap:16px;margin:8px auto 28px;padding:0 20px;max-width:460px;}
+  .start-portrait img {width:112px;height:140px;border-radius:18px;}
+  .start-portrait figcaption {font-size:12px;max-width:100%;margin-top:8px;}
+  .start-form h1 {font-size:28px;margin-bottom:20px;}
+  .compact-topics {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .compact-topic {font-size:14px;min-height:44px;padding:9px 12px;}
+  .game-main {padding:0 8px 16px;}
+  .lesson-card {border-radius:20px;}
+  .game-topline {padding:8px 12px;gap:8px;}
+  .lesson-location {gap:9px;}
+  .game-end {font-size:14px;gap:5px;padding-right:0;}
+  .game-eyebrow {font-size:14px;}
+  .game-top-actions {gap:8px;}
+  .game-score {padding:6px 9px;}
+  .progress-track {display:none;}
+  .progress-count {display:block;}
+  .lesson-stage {padding:12px;gap:16px;}
+  .activity-scene {border-radius:14px;}
+  .game-conversation {grid-template-columns:min(43vw,168px) minmax(0,1fr);gap:14px;}
+  .game-conversation .teacher-sprite {width:min(43vw,168px);height:auto;aspect-ratio:4/5;border-radius:16px;}
+  .game-question h1 {font-size:21px;line-height:1.28;}
+  .game-state {font-size:12px;margin-top:8px;}
+  .lesson-response {padding:10px;gap:10px;}
+  .game-mic {min-width:108px;padding:12px 14px;}
+  .lesson-response.is-text {flex-wrap:nowrap;gap:8px;}
+  .is-text .game-mic {width:44px;min-width:44px;min-height:48px;padding:10px;}
+  .is-text .game-mic span {display:none;}
+  .game-text-form {flex:1;width:auto;gap:8px;}
+  .game-text-form input {padding:11px 10px;}
+  .game-text-form button {width:44px;flex-shrink:0;}
+  .game-utilities {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:4px;}
+  .game-utilities .quiet {padding:8px 6px;font-size:13px;gap:5px;}
+  .game-notice {padding:10px 14px;font-size:13px;}
+  .game-celebration {padding:22px 16px;}
+  .game-celebration .teacher-sprite {width:192px;height:240px;}
+  .game-celebration h1 {font-size:27px;}
+  .game-dev {padding:12px;}
 }
-@media (max-width: 600px) {
-  .brand .brand-logo { width: 156px; height: 52px; }
+@media(max-width:360px) {
+  .game-topline {flex-wrap:wrap;gap:0;}
+  .game-top-actions {margin-left:auto;}
+  .game-conversation {grid-template-columns:124px minmax(0,1fr);gap:12px;}
+  .game-conversation .teacher-sprite {width:124px;}
+  .game-question h1 {font-size:19px;}
+  .game-utilities .quiet {font-size:12px;padding:8px 6px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .teacher-sprite,.teacher-sprite.is-talking,.teacher-sprite .pose-front,.game-score strong,.tap-star,.target-retry {animation:none;transition:none;}
 }

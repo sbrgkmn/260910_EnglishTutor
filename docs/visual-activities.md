@@ -100,3 +100,9 @@ A silent audio activation clip could finish after another topic started, mistake
 First-visit acknowledgement was exercised on a fresh local origin at 390×844. The default voice flow handled unavailable microphone recognition by exposing text input. My Town completed all six steps with real teacher playback, a recoverable wrong tap, grammar feedback, a personalized follow-up and 100 stars. The modal is centered and scrollable, and lesson input uses 16px text. Automated tests cover the six topics, levels, variants, speech cancellation, silence submission, blocked playback, stalled startup and server routes. Device-size checks are desktop-browser emulation; physical phone microphone quality still depends on the phone/browser and permission settings.
 
 Safari media behavior reference: https://webkit.org/blog/7734/auto-play-policy-changes-for-macos/
+
+## Compact desktop and mobile layout
+
+The lesson is contained in one card: picture and teacher/question side by side above 800px, stacked on smaller screens. The teacher uses the full portrait with `object-fit: contain`. Answer controls sit immediately beneath the lesson; Topics and the brand return to setup. Mobile text input, microphone and send share one row, secondary controls have equal widths, and the progress counter replaces the desktop progress bars. Microphone behavior and lesson scoring are unchanged.
+
+Visual checks at 320px, 390px and 1440px confirmed no horizontal overflow, uncropped portraits, readable question text and usable picture choices. At 390px, the first question and answer/secondary controls fit within an 844px viewport. Typed answers and picture taps advanced My Town through its six-step flow. The automated suite contains 48 passing tests; physical-phone speech recognition is still separate from viewport testing.
