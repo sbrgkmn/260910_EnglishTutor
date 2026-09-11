@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Level, TutorState, Turn } from "../types";
 import type { VoiceProvider } from "../voice/types";
 import { speechSentences } from "../voice";
-import { handsFreeSupported, listenHandsFree } from "../speech/hands-free";
+import { handsFreeSupported, listenHandsFree, type MicrophoneStatus, type MicrophoneDiagnostic } from "../speech/hands-free";
+import { activateAudioContext } from "../speech/audio-context";
 import { generateActivity } from "../activities/generateActivity";
 import { evaluateAnswer } from "../activities/evaluateAnswer";
 import type {
@@ -44,6 +45,10 @@ export function useGameController({
   const [textMode, setTextMode] = useState(initialTextMode);
   const [auto, setAuto] = useState(!initialTextMode);
   const [listening, setListening] = useState(false);
+  const [micStatus, setMicStatus] = useState<MicrophoneStatus>("idle");
+  const [micLevel, setMicLevel] = useState(0);
+  const [hearing, setHearing] = useState(false);
+  const [micDiagnostics, setMicDiagnostics] = useState<(MicrophoneDiagnostic & { time: string })[]>([]);
   const [draft, setDraft] = useState("");
   const [sentence, setSentence] = useState("Let’s explore!");
   const [notice, setNotice] = useState("");
@@ -219,6 +224,8 @@ export function useGameController({
     );
     const hide = () => {
       if (document.hidden) {
+        if (input.current && !input.current.signal.aborted)
+          setNotice("Listening paused while you were away. Tap Speak when you’re ready.");
         setAuto(false);
         input.current?.abort();
         setListening(false);
@@ -250,20 +257,31 @@ export function useGameController({
       return;
     const controller = new AbortController();
     input.current = controller;
-    setListening(true);
+    const current = () => live.current && input.current === controller && !controller.signal.aborted;
+    setListening(false);
+    setMicStatus("starting");
     void listenHandsFree(
       {
-        onText: setDraft,
-        onSpeaking: () => {},
-        onComplete: (text) => submitRef.current({ type: "speech", text }),
-        onError: () => {
-          if (!controller.signal.aborted) {
+        onText: (text) => { if (current()) setDraft(text); },
+        onSpeaking: (value) => { if (current()) setHearing(value); },
+        onStatus: (status) => {
+          if (!current()) return;
+          setMicStatus(status);
+          setListening(status === "listening");
+        },
+        onLevel: (level) => { if (current()) setMicLevel(level); },
+        onDiagnostic: (event) => {
+          if (current()) setMicDiagnostics((events) => [...events.slice(-29), {
+            ...event, time: new Date().toLocaleTimeString(),
+          }]);
+        },
+        onComplete: (text) => { if (current()) submitRef.current({ type: "speech", text }); },
+        onError: (message) => {
+          if (current()) {
             setAuto(false);
             setTextMode(true);
             setListening(false);
-            setNotice(
-              "Try typing your answer, or allow your microphone and tap Speak.",
-            );
+            setNotice(message);
           }
         },
       },
@@ -271,7 +289,11 @@ export function useGameController({
     );
     return () => {
       controller.abort();
+      if (input.current === controller) input.current = null;
       setListening(false);
+      setMicStatus("idle");
+      setMicLevel(0);
+      setHearing(false);
     };
   }, [auto, textMode, state, game.index, game.completed]);
   useEffect(() => {
@@ -359,6 +381,10 @@ export function useGameController({
     textMode,
     sound,
     auto,
+    micStatus,
+    micLevel,
+    hearing,
+    micDiagnostics,
     memoryHidden,
     imageLoading,
     fetchScene,
@@ -371,9 +397,10 @@ export function useGameController({
         );
         return;
       }
+      activateAudioContext();
+      setNotice("");
       setTextMode(false);
       setAuto((v) => !v);
-      voice.unlock?.();
     },
     toggleText: () => {
       setAuto(false);

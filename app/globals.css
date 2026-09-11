@@ -2059,6 +2059,11 @@ textarea::placeholder {
 .game-state {display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#6f7d70;}
 .game-state i {display:block;width:6px;height:6px;border-radius:50%;background:#93ad91;}
 .game-state i.speaking,.game-state i.listening {background:#3e8179;box-shadow:0 0 0 4px #7ba59b22;}
+.mic-level {display:block;width:92px;height:10px;margin-top:8px;accent-color:#3e8179;}
+.mic-level::-webkit-meter-bar {background:#e7ebdf;border:0;border-radius:8px;}
+.mic-level::-webkit-meter-optimum-value {background:#3e8179;border-radius:8px;}
+.mic-diagnostics {font-size:12px;overflow-wrap:anywhere;}
+.mic-diagnostics ol {padding-left:20px;max-height:220px;overflow:auto;}
 .game-mic {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#284d42;color:#fffdf4;border:0;border-radius:50%;width:80px;height:80px;cursor:pointer;box-shadow:0 4px 0 #1e3b33;transition:transform .2s;}
 .game-mic span {font-size:11px;}
 .game-mic:hover:not(:disabled) {transform:translateY(-2px);}
@@ -2118,16 +2123,15 @@ textarea::placeholder {
 .sprite-tester button[aria-pressed="true"] {background:#dce9d5;outline:2px solid #365f4e;}
 
 .teacher-sprite-frames {position:relative;width:100%;height:100%;overflow:hidden;border-radius:inherit;}
-.teacher-sprite .teacher-sprite-frames img {width:145%;max-width:none;height:145%;inset:auto;left:-22.5%;top:-5%;border-radius:0;object-fit:cover;}
+.teacher-sprite .teacher-sprite-frames img {width:100%;max-width:none;height:100%;inset:0;border-radius:0;object-fit:contain;object-position:center;}
 
 /* A quieter lesson screen, with expressions large enough to read. */
-.game-conversation {grid-template-columns:156px minmax(0,1fr) 82px;gap:24px;padding:24px 0 10px;}
-.game-conversation .teacher-sprite {width:148px;height:172px;border-radius:74px 74px 52px 52px;}
+.game-conversation {grid-template-columns:240px minmax(0,1fr) 82px;gap:24px;padding:24px 0 10px;}
+.game-conversation .teacher-sprite {width:240px;height:300px;border-radius:24px;}
 .game-question h1 {margin-top:0;}
-.game-state:has(i:only-child) {display:none;}
 .game-bottom {margin-top:14px;justify-content:center;}
 .game-utilities {margin-top:14px;}
-.game-celebration .teacher-sprite {width:168px;height:194px;}
+.game-celebration .teacher-sprite {width:240px;height:300px;border-radius:24px;}
 .scene-illustration {aspect-ratio:3/2;background:#faf5e9;}
 .object-picture {display:block;width:72px;height:72px;background-repeat:no-repeat;border-radius:12px;}
 .picture-choices button {align-items:center;}
@@ -2135,9 +2139,9 @@ textarea::placeholder {
 .game-dev {margin-top:24px;}
 @media(min-width:1100px){.activity-scene{max-height:none;width:min(100%,656px);}.activity-scene.scene-illustration{width:min(100%,630px);}}
 @media(max-width:600px){
-  .game-conversation {grid-template-columns:112px minmax(0,1fr);gap:18px;padding:22px 2px 4px;align-items:center;}
-  .game-conversation .teacher-sprite {width:104px;height:128px;border-radius:54px 54px 38px 38px;}
-  .game-question h1 {font-size:25px;min-height:0;line-height:1.16;}
+  .game-conversation {grid-template-columns:min(46vw,176px) minmax(0,1fr);gap:14px;padding:22px 0 4px;align-items:center;}
+  .game-conversation .teacher-sprite {width:min(46vw,176px);height:auto;aspect-ratio:4/5;border-radius:18px;}
+  .game-question h1 {font-size:clamp(21px,5.6vw,25px);min-height:0;line-height:1.16;}
   .game-state {font-size:13px;}
   .game-mic {margin:0;}
   .game-bottom {margin-top:16px;}

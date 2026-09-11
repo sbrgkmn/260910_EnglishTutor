@@ -9,6 +9,7 @@ type Recognition = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  onstart: (() => void) | null;
   onresult: ((event: { results: ArrayLike<RecognitionResult> }) => void) | null;
   onerror: ((event: { error: string }) => void) | null;
   onend: (() => void) | null;
@@ -30,6 +31,7 @@ export class BrowserSpeechToText implements SpeechToTextService {
     return !!recognitionConstructor();
   }
   speechToText({
+    onStart,
     onText,
     onEnd,
     onError,
@@ -46,6 +48,7 @@ export class BrowserSpeechToText implements SpeechToTextService {
     recognition.continuous = true;
     recognition.interimResults = true;
     const detach = () => {
+      recognition.onstart = null;
       recognition.onresult = null;
       recognition.onerror = null;
       recognition.onend = null;
@@ -66,6 +69,7 @@ export class BrowserSpeechToText implements SpeechToTextService {
             .trim(),
         );
     };
+    recognition.onstart = () => { if (!settled) onStart?.(); };
     recognition.onerror = (e) => {
       if (settled) return;
       const messages: Record<string, string> = {

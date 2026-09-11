@@ -57,6 +57,12 @@ export function Game({
   }, [c.game.activity.id, c.fetchScene]);
   const q = c.game.activity.questions[c.game.index];
   const busy = c.state === "THINKING" || c.state === "SPEAKING";
+  const status = c.micStatus === "starting" ? "Connecting microphone…"
+    : c.micStatus === "reconnecting" ? "Reconnecting microphone…"
+    : c.state === "LISTENING" ? c.hearing ? "Hearing your voice…" : "Listening…"
+    : c.state === "THINKING" ? "Thinking…"
+    : c.state === "SPEAKING" ? "Speaking…"
+    : q.type === "find" ? "Tap the picture or speak." : "";
   return (
     <main className="game-main">
       <div className="game-topline">
@@ -114,18 +120,13 @@ export function Game({
             />
             <div className="game-question">
               <h1 aria-live="polite">{c.sentence}</h1>
-              <span className="game-state" role="status">
+              {status && <span className="game-state" role="status">
                 <i className={c.state.toLowerCase()} />
-                {c.state === "LISTENING"
-                  ? "Listening…"
-                  : c.state === "THINKING"
-                    ? "Thinking…"
-                    : c.state === "SPEAKING"
-                      ? "Speaking…"
-                      : q.type === "find"
-                        ? "Tap the picture or speak."
-                        : ""}
-              </span>
+                {status}
+              </span>}
+              {c.micStatus === "listening" && (
+                <meter className="mic-level" aria-label="Microphone input level" min={0} max={1} value={c.micLevel} />
+              )}
             </div>
             <button
               className={`game-mic ${c.auto ? "mic-on" : ""}`}
@@ -323,6 +324,13 @@ export function Game({
             Sprite pack: generated expressions · pending teacher review. Image:{" "}
             {c.game.activity.scene.imageSource}. Hitboxes: authored.
           </p>
+          <details className="mic-diagnostics">
+            <summary>Microphone diagnostics · {c.micStatus}</summary>
+            <p>Connection events only. Audio and recognized words are not saved here.</p>
+            <ol>{c.micDiagnostics.map((event, i) => (
+              <li key={i}>{event.time} · {event.event}{event.detail ? ` · ${event.detail}` : ""}</li>
+            ))}</ol>
+          </details>
           <pre>{JSON.stringify(c.game.activity, null, 2)}</pre>
         </details>
       )}

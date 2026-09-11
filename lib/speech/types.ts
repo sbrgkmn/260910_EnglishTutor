@@ -5,6 +5,7 @@ export interface SpeechInputSession {
 export interface SpeechToTextService {
   supported(): boolean;
   speechToText(callbacks: {
+    onStart?: () => void;
     onText: (text: string) => void;
     onEnd: () => void;
     onError: (message: string, code?: string) => void;

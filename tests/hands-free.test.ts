@@ -85,6 +85,7 @@ test("hands-free flushes final words once, restarts recognition without losing w
     speechToText(cb) {
       callbacks = cb;
       starts++;
+      cb.onStart?.();
       return {
         cancel() {},
         stop() {
@@ -135,7 +136,7 @@ test("hands-free flushes final words once, restarts recognition without losing w
     tick(5000);
     assert.equal(answers.length, 1);
     assert.equal(trackStops, 1);
-    assert.equal(contextCloses, 1);
+    assert.equal(contextCloses, 0, "keep the unlocked audio context between answers");
     const paused = new AbortController();
     await listenHandsFree(options, paused.signal, input);
     callbacks.onText("do not send this");
@@ -151,9 +152,9 @@ test("hands-free flushes final words once, restarts recognition without losing w
     tick(200);
     assert.equal(starts, before + 1);
     assert.deepEqual(errors, []);
-    callbacks.onError("Connection failed", "network");
+    callbacks.onError("Microphone permission was declined", "not-allowed");
     tick(5000);
-    assert.deepEqual(errors, ["Connection failed"]);
+    assert.deepEqual(errors, ["Microphone permission was declined"]);
     assert.equal(trackStops, 3);
   } finally {
     for (const [key, descriptor] of [
